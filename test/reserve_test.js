@@ -1,13 +1,15 @@
-const ReserveTest = artifacts.require("ReserveTest");
+const Reserve = artifacts.require("./Reserve.sol");
 
 /*
- * uncomment accounts to access the test accounts made available by the
  * Ethereum client
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
-contract("ReserveTest", function (/* accounts */) {
-  it("should assert true", async function () {
-    await ReserveTest.deployed();
-    return assert.isTrue(true);
+let reserve;
+contract("Reserve contract", (accounts) => {
+  describe("Contract deployment", () => {
+    it("Contract deployment", async function () {
+      // reserve = await Reserve.deployed();
+      // assert(reserve !== undefined, "Contract deployment failed");
+    });
   });
 });
