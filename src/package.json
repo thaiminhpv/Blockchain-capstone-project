@@ -1,0 +1,37 @@
+{
+  "name": "decentralized-exchange",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "browserify": "^16.5.0",
+    "watchify": "^3.11.1",
+    "web3": "^1.2.1"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "es2015"
+          ]
+        }
+      ]
+    ]
+  },
+  "scripts": {
+    "serve": "beefy index.js --live",
+    "build": "browserify index.js -o dist/bundle.js",
+    "watch": "watchify index.js -o dist/bundle.js -v"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babelify": "^8.0.0",
+    "beefy": "^2.1.8"
+  }
+}

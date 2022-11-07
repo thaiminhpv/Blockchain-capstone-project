@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Decentralized Exchange</title>
+  <link rel="stylesheet" type="text/css" href="assets/css/main.css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,500,600" rel="stylesheet">
+  <script src="libraries/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+  <h1 class="main-title">Decentralized Exchange</h1>
+  <div class="main-content">
+    <div class="tab-container">
+      <div class="tab">
+        <div class="tab__item tab__item--active" data-content-id="swap">SWAP</div>
+        <div class="tab__item" data-content-id="transfer">TRANSFER</div>
+      </div>
+    </div>
+
+    <div class="swap active" id="swap">
+      <div class="input-container">
+        <label class="input-title" for="swap-source-amount">From:</label>
+        <div class="input-group">
+          <div class="dropdown">
+            <div class="dropdown__trigger">
+              <span class="selected-target" id="selected-src-symbol">Loading...</span>
+              <div class="dropdown__triangle"></div>
+            </div>
+            <div class="dropdown__content"></div>
+          </div>
+          <input class="input-item" id="swap-source-amount" type="text" placeholder="0"/>
+        </div>
+      </div>
+
+      <div class="swap__icon"></div>
+
+      <div class="input-container">
+        <div class="input-title">To:</div>
+        <div class="input-group">
+          <div class="dropdown">
+            <div class="dropdown__trigger">
+              <span class="selected-target" id="selected-dest-symbol">Loading...</span>
+              <div class="dropdown__triangle"></div>
+            </div>
+            <div class="dropdown__content">
+            </div>
+          </div>
+          <div class="input-placeholder">0</div>
+        </div>
+        <div class="swap__rate">1 <span id="rate-src-symbol">Loading...</span> = <span id="exchange-rate">Loading...</span> <span id="rate-dest-symbol">Loading...</span></div>
+      </div>
+
+      <div class="button modal-trigger" data-modal-id="confirm-swap-modal" id="swap-button">Swap Now</div>
+    </div>
+
+    <div class="transfer" id="transfer">
+      <div class="input-container">
+        <label class="input-title" for="transfer-source-amount">From:</label>
+        <div class="input-group">
+          <div class="dropdown">
+            <div class="dropdown__trigger">
+              <span class="selected-target" id="selected-transfer-token">Loading...</span>
+              <div class="dropdown__triangle"></div>
+            </div>
+            <div class="dropdown__content"></div>
+          </div>
+          <input class="input-item" id="transfer-source-amount" type="text"/>
+        </div>
+      </div>
+
+      <div class="input-container input-container--mt">
+        <label class="input-title" for="transfer-address">To Address:</label>
+        <div class="input-group">
+          <input class="input-item input-item--single" id="transfer-address" type="text"/>
+        </div>
+      </div>
+
+      <div class="button">Transfer Now</div>
+    </div>
+
+    <div class="import-account">
+      <div class="import-account__title">Connect with</div>
+      <div class="import-account__container">
+        <div class="import-account__item" id="import-metamask">
+          <div class="import-account__icon metamask"></div>
+          <div class="import-account__name">METAMASK</div>
+        </div>
+
+        <div class="import-account__item import-account__item--inactive" id="import-keystore">
+          <div class="import-account__icon keystore"></div>
+          <div class="import-account__name">KEYSTORE</div>
+        </div>
+
+        <div class="import-account__item import-account__item--inactive" id="import-private-key">
+          <div class="import-account__icon private-key"></div>
+          <div class="import-account__name">PRIVATE KEY</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="confirm-swap-modal">
+  <div class="modal__content">This is the content of Confirm Swap Modal</div>
+</div>
+
+<script src="index.js"></script>
+</body>
+</html>
