@@ -175,6 +175,7 @@ contract StandardToken is BasicToken, ERC20 {
  * to the creator. Note they can later distribute these tokens
  * as they wish using `transfer` and other `StandardToken` functions.
  */
+ /*
 contract TestToken is StandardToken {
 
     string public name = "Test";
@@ -206,3 +207,4 @@ contract TestToken is StandardToken {
         return burn(_value);
     }
 }
+*/
