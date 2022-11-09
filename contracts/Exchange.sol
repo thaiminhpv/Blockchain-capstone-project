@@ -62,11 +62,22 @@ contract Exchange {
     function exchange(address srcToken, address destToken, uint256 srcAmount) public payable {
         Reserve srcReserve = reserves[srcToken];
         Reserve destReserve = reserves[destToken];
+        ERC20 src;
+        ERC20 dest;
+        uint256 sendBackEtherAmount;
+        uint256 outTokenAmount;
+
         require(srcReserve != address(0) && destReserve != address(0), "reserve not found");
         require(srcReserve.supportedToken() == srcToken && destReserve.supportedToken() == destToken, "invalid reserve");
         // if srcToken is ETH
         if (srcToken == NATIVE_TOKEN_ADDRESS) {
             require(msg.value == srcAmount, "msg.value != srcAmount");
+            dest = ERC20(destToken);
+
+            // buy destToken from destReserve
+            outTokenAmount = destReserve.exchange.value(msg.value)(true, msg.value);  // transfer ETH from Reserve to Exchange
+            assert(dest.allowance(address(destReserve), address(this)) >= outTokenAmount);  // check allowance
+            dest.transferFrom(address(destReserve), msg.sender, outTokenAmount);  // transfer destToken from Exchange to User
         } else if (destToken == NATIVE_TOKEN_ADDRESS) { 
             /*
             ○ X tokenA is transferred from user’s wallet to Exchange by calling exchange function in Exchange’s contract.
@@ -75,23 +86,33 @@ contract Exchange {
             ○ Exchange transfers Y ETH back to user’s wallet (in exchange function of Exchange’s contract).
             */
             require(msg.value == 0, "msg.value != 0");
+            src = ERC20(srcToken);
+
+            src.transfer(address(this), srcAmount);  // receive srcToken from user
+            src.approve(address(srcReserve), srcAmount);  // approve srcReserve to spend srcToken
+            // isBuy=false
+            sendBackEtherAmount = srcReserve.exchange(false, srcAmount);  // transfer srcToken from Exchange to Reserve
+
+            // forward ETH to User
+            msg.sender.transfer(sendBackEtherAmount);
         } else {
             // srcToken and destToken are both not ETH
             require(msg.value == 0, "msg.value != 0");
-            ERC20 src = ERC20(srcToken);
-            ERC20 dest = ERC20(destToken);
+            src = ERC20(srcToken);
+            dest = ERC20(destToken);
 
             // sell srcToken to srcReserve
             // src.transferFrom(msg.sender, address(this), srcAmount);  // what msg.sender in transferFrom? (not the one in param)
             src.transfer(address(this), srcAmount);  // receive srcToken from user
             src.approve(address(srcReserve), srcAmount);  // approve srcReserve to spend srcToken
             // isBuy=false
-            srcReserve.exchange(false, srcAmount);  // transfer srcToken from Exchange to Reserve
-            // get ETH from srcReserve
+            sendBackEtherAmount = srcReserve.exchange(false, srcAmount);  // transfer srcToken from Exchange to Reserve
+            // ~forward ETH to User~
             
             // buy destToken from destReserve
-            destReserve.exchange(true, srcAmount);  // transfer ETH from Reserve to Exchange
-
+            outTokenAmount = destReserve.exchange.value(sendBackEtherAmount)(true, sendBackEtherAmount);  // transfer ETH from Reserve to Exchange
+            assert(dest.allowance(address(destReserve), address(this)) >= outTokenAmount);  // check allowance
+            dest.transferFrom(address(destReserve), msg.sender, outTokenAmount);  // transfer destToken from Exchange to User
         }
     }
 }
