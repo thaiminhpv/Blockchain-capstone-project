@@ -122,9 +122,9 @@ contract Reserve {
             // receive `srcAmount` token from user, and send ETH back to user
             require(hasEnoughFund(isBuy, srcAmount), "not enough fund");
             
+            // Exchange contract should call approve function to allow Reserve to take token from Exchange contract
             // this Contract receive token from user
             supportedToken.transferFrom(msg.sender, address(this), srcAmount);
-            // Exchange contract should call approve function to allow Reserve to take token from Exchange contract
 
             // send ETH from this Smart Contract fund to user
             // msg.sender.transfer(srcAmount * rate); // transer srcAmount * rate ETH to msg.sender

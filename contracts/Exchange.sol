@@ -9,6 +9,9 @@ contract Exchange {
     /// @dev Exchange owner: the address that can call addReserve and removeReserve
     address public owner;
 
+    /// @dev native token address: can be ETH or TOMO
+    address public constant NATIVE_TOKEN_ADDRESS = address(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+
     /// @dev Mapping from token to reserve
     mapping (address => Reserve) public reserves;
 
@@ -62,9 +65,9 @@ contract Exchange {
         require(srcReserve != address(0) && destReserve != address(0), "reserve not found");
         require(srcReserve.supportedToken() == srcToken && destReserve.supportedToken() == destToken, "invalid reserve");
         // if srcToken is ETH
-        if (srcToken == address(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)) {
+        if (srcToken == NATIVE_TOKEN_ADDRESS) {
             require(msg.value == srcAmount, "msg.value != srcAmount");
-        } else if (destToken == address(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)) { 
+        } else if (destToken == NATIVE_TOKEN_ADDRESS) { 
             /*
             ○ X tokenA is transferred from user’s wallet to Exchange by calling exchange function in Exchange’s contract.
             ○ X tokenA is transferred from Exchange to Reserve by calling exchange function in Reserve’s contract.
@@ -72,15 +75,22 @@ contract Exchange {
             ○ Exchange transfers Y ETH back to user’s wallet (in exchange function of Exchange’s contract).
             */
             require(msg.value == 0, "msg.value != 0");
-            ERC20 _token = ERC20(srcToken);
-            _token.transferFrom(msg.sender, this, srcAmount);
-            _token.approve(srcReserve.address, srcAmount);
-            srcReserve.exchange(srcToken, destToken, srcAmount);
-            // receivedAmount = 
-
         } else {
             // srcToken and destToken are both not ETH
             require(msg.value == 0, "msg.value != 0");
+            ERC20 src = ERC20(srcToken);
+            ERC20 dest = ERC20(destToken);
+
+            // sell srcToken to srcReserve
+            // src.transferFrom(msg.sender, address(this), srcAmount);  // what msg.sender in transferFrom? (not the one in param)
+            src.transfer(address(this), srcAmount);  // receive srcToken from user
+            src.approve(address(srcReserve), srcAmount);  // approve srcReserve to spend srcToken
+            // isBuy=false
+            srcReserve.exchange(false, srcAmount);  // transfer srcToken from Exchange to Reserve
+            // get ETH from srcReserve
+            
+            // buy destToken from destReserve
+            destReserve.exchange(true, srcAmount);  // transfer ETH from Reserve to Exchange
 
         }
     }
