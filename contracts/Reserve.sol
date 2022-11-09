@@ -103,6 +103,7 @@ contract Reserve {
       * @param srcAmount source amount
      */
     function exchange(bool isBuy, uint256 srcAmount) public payable {
+        // msg.sender is Exchange contract
         uint256 rate = getExchangeRate(isBuy, srcAmount);
         require(rate > 0, "no exchange rate");
         if (isBuy) {
@@ -111,12 +112,11 @@ contract Reserve {
             require(msg.value == srcAmount, "wrong amount of ETH");
 
             // this Contract receive ETH from user
-            address(this).transfer(msg.value);  // transer msg.value ETH to address(this)
-            // payable(address(this)).transfer(msg.value);
+            // can this be omitted?  https://ethereum.stackexchange.com/questions/30868/where-does-the-rest-of-msg-value-go
+            address(this).transfer(msg.value);  // store msg.value ETH to address(this)
             
             // send token from this Smart Contract fund to user
-            supportedToken.transfer(msg.sender, srcAmount * rate);
-
+            supportedToken.approve(msg.sender, srcAmount * rate);
         } else {
             // selling
             // receive `srcAmount` token from user, and send ETH back to user
@@ -127,8 +127,8 @@ contract Reserve {
             // Exchange contract should call approve function to allow Reserve to take token from Exchange contract
 
             // send ETH from this Smart Contract fund to user
-            msg.sender.transfer(srcAmount * rate); // transer srcAmount * rate ETH to msg.sender
-            // payable(msg.sender).transfer(srcAmount * rate); // transer srcAmount * rate ETH to msg.sender
+            // msg.sender.transfer(srcAmount * rate); // transer srcAmount * rate ETH to msg.sender
+            address(this).approve(msg.sender, srcAmount * rate);  // approve Exchange contract to take ETH from this Smart Contract, then transfer to User's wallet
         }
     }
 
