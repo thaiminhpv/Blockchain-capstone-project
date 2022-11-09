@@ -63,7 +63,17 @@ contract Reserve {
       * @param _destAddress address to send withdrawn funds to
      */
     function withdrawFunds(address _token, uint256 _amount, address _destAddress) public onlyOwner("withdraw funds") {
-        // require(_token == supportedToken);
+        // transfer all token and ETH to destAddress
+        if (_token == address(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)) {
+          // ETH
+          _destAddress.transfer(_amount);
+        } else if (_token == address(supportedToken)) {
+          // supported token
+          supportedToken.transfer(_destAddress, _amount);
+        } else {
+          // other tokens
+          ERC20(_token).transfer(_destAddress, _amount);
+        }
     }
 
     /**
