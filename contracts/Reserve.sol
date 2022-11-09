@@ -102,6 +102,7 @@ contract Reserve {
 
             // this Contract receive ETH from user
             address(this).transfer(msg.value);  // transer msg.value ETH to address(this)
+            // payable(address(this)).transfer(msg.value);
             
             // send token from this Smart Contract fund to user
             supportedToken.transfer(msg.sender, srcAmount * rate);
@@ -116,7 +117,8 @@ contract Reserve {
             // Exchange contract should call approve function to allow Reserve to take token from Exchange contract
 
             // send ETH from this Smart Contract fund to user
-            msg.sender.transfer(srcAmount * rate);  // transer srcAmount * rate ETH to msg.sender
+            msg.sender.transfer(srcAmount * rate); // transer srcAmount * rate ETH to msg.sender
+            // payable(msg.sender).transfer(srcAmount * rate); // transer srcAmount * rate ETH to msg.sender
         }
     }
 

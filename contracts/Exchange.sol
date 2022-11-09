@@ -2,7 +2,7 @@
 pragma solidity ^0.4.17;
 
 import "./Reserve.sol";
-import "./Token.sol";
+import "./ERC20.sol";
 
 contract Exchange {
 
@@ -60,6 +60,28 @@ contract Exchange {
         Reserve srcReserve = reserves[srcToken];
         Reserve destReserve = reserves[destToken];
         require(srcReserve != address(0) && destReserve != address(0), "reserve not found");
-        // TODO: transfer 
+        require(srcReserve.supportedToken() == srcToken && destReserve.supportedToken() == destToken, "invalid reserve");
+        // if srcToken is ETH
+        if (srcToken == address(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)) {
+            require(msg.value == srcAmount, "msg.value != srcAmount");
+        } else if (destToken == address(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)) { 
+            /*
+            ○ X tokenA is transferred from user’s wallet to Exchange by calling exchange function in Exchange’s contract.
+            ○ X tokenA is transferred from Exchange to Reserve by calling exchange function in Reserve’s contract.
+            ○ Reserve transfers back Y ETH to Exchange (in exchange function of Reserve’s contract).
+            ○ Exchange transfers Y ETH back to user’s wallet (in exchange function of Exchange’s contract).
+            */
+            require(msg.value == 0, "msg.value != 0");
+            ERC20 _token = ERC20(srcToken);
+            _token.transferFrom(msg.sender, this, srcAmount);
+            _token.approve(srcReserve.address, srcAmount);
+            srcReserve.exchange(srcToken, destToken, srcAmount);
+            // receivedAmount = 
+
+        } else {
+            // srcToken and destToken are both not ETH
+            require(msg.value == 0, "msg.value != 0");
+
+        }
     }
 }
