@@ -26,6 +26,9 @@ An example of a correct flow (assuming user exchanges X tokenA to Y ETH):
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.4.17;
 
+import "./ERC20.sol";
+import "./utils.sol";
+
 /**
   * @title Reserve
   * @dev Reserve contract for exchanging ETH with supported token
@@ -35,8 +38,7 @@ contract Reserve {
     /// @dev Reserve owner: the address that can call withdrawFunds and setExchangeRates
     address public owner;
 
-    uint256 public funds;
-    address public supportedToken;
+    ERC20 public supportedToken;
     uint256 public buyRate;
     uint256 public sellRate;
 
@@ -46,16 +48,30 @@ contract Reserve {
      */
     constructor(address _supportedToken) {
         owner = msg.sender;
-        supportedToken = _supportedToken;
+        supportedToken = ERC20(_supportedToken);
+    }
+
+    modifier onlyOwner(string memory _message) {
+        require(msg.sender == owner, StringUtil.concat("Only owner can ", _message));
+        _;
+    }
+
+    /**
+      * @dev Withdraw funds from Reserve
+      * @param _token address of token to withdraw
+      * @param _amount amount of token to withdraw
+      * @param _destAddress address to send withdrawn funds to
+     */
+    function withdrawFunds(address _token, uint256 _amount, address _destAddress) public onlyOwner("withdraw funds") {
+        // require(_token == supportedToken);
     }
 
     /**
       * @dev Set exchange rates
-      * @param _buyRate buy rate
-      * @param _sellRate sell rate
+      * @param _buyRate buyRate is how many tokens we can buy using 1 ETH, 
+      * @param _sellRate sellRate is how many ETH we will receive when selling 1 token
      */
-    function setExchangeRates(uint256 _buyRate, uint256 _sellRate) public {
-        require(msg.sender == owner, "only owner can set exchange rates");
+    function setExchangeRates(uint256 _buyRate, uint256 _sellRate) public onlyOwner("set exchange rates") {
         buyRate = _buyRate;
         sellRate = _sellRate;
     }
@@ -80,10 +96,27 @@ contract Reserve {
         uint256 rate = getExchangeRate(isBuy, srcAmount);
         require(rate > 0, "no exchange rate");
         if (isBuy) {
+            // receive ETH from user, and send token back to user
+            require(hasEnoughFund(isBuy, srcAmount), "not enough fund");
             require(msg.value == srcAmount, "wrong amount of ETH");
-            // TODO: transfer token to sender
+
+            // this Contract receive ETH from user
+            address(this).transfer(msg.value);  // transer msg.value ETH to address(this)
+            
+            // send token from this Smart Contract fund to user
+            supportedToken.transfer(msg.sender, srcAmount * rate);
+
         } else {
-            // TODO: collect srcAmount tokens from sender
+            // selling
+            // receive `srcAmount` token from user, and send ETH back to user
+            require(hasEnoughFund(isBuy, srcAmount), "not enough fund");
+            
+            // this Contract receive token from user
+            supportedToken.transferFrom(msg.sender, address(this), srcAmount);
+            // Exchange contract should call approve function to allow Reserve to take token from Exchange contract
+
+            // send ETH from this Smart Contract fund to user
+            msg.sender.transfer(srcAmount * rate);  // transer srcAmount * rate ETH to msg.sender
         }
     }
 
@@ -94,6 +127,10 @@ contract Reserve {
       * @return hasEnoughFund true if reserve has enough funds
      */
     function hasEnoughFund(bool isBuy, uint256 srcAmount) internal view returns (bool) {
-        // TODO: check if reserve has enough funds to do exchange
+        if (isBuy) {
+          supportedToken.balanceOf(address(this)) >= srcAmount * buyRate;
+        } else {
+            return address(this).balance >= srcAmount * sellRate;
+        }
     }
 }
