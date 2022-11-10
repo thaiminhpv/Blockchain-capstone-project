@@ -112,7 +112,7 @@ contract("Reserve contract", (accounts) => {
     });
   });
 
-  describe("Buy (calling from Exchange contract)", () => {
+  describe("Exchange (calling from Exchange contract)", () => {
     it("Buy tokenA with ETH", async () => {
       isBuy = true;
       srcAmount = 3000;
