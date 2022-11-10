@@ -7,7 +7,7 @@ const Token = artifacts.require("Token");
 module.exports = async function(deployer, network, accounts) {
     await deployer.deploy(Utils);
     await deployer.link(Utils, [Exchange, Reserve]);
-    const tokenA = await Token.new(Token, "TokenA", "TKA", 18);
+    const tokenA = await Token.new("TokenA", "TKA", 18);
     const tokenB = await Token.new("TokenB", "TKB", 18);
     
     const reserveA = await Reserve.new(tokenA.address);
