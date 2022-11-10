@@ -131,12 +131,11 @@ contract Reserve {
             
             // Exchange contract should call approve function to allow Reserve to take token from Exchange contract
             // this Contract receive token from user
-            // supportedToken.transferFrom(msg.sender, address(this), srcAmount);
-            supportedToken.transferFrom(msg.sender, address(this), allowance);
+            supportedToken.transferFrom(msg.sender, address(this), srcAmount);
 
             // send ETH from this Smart Contract fund to user
-            // msg.sender.transfer(srcAmount * rate); // transer srcAmount * rate ETH to msg.sender
-            msg.sender.transfer(srcAmount * rate);  // approve Exchange contract to take ETH from this Smart Contract, then transfer to User's wallet
+            // transer srcAmount * rate ETH to msg.sender (Exchange contract), then Exchange contract will transfer to User's wallet
+            msg.sender.transfer(srcAmount * rate);
         }
         return srcAmount * rate;
     }

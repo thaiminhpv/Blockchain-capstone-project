@@ -1,8 +1,8 @@
 const Reserve = artifacts.require("./Reserve.sol");
 const Token = artifacts.require("./Token.sol");
 
-let tokenA, tokenB, reserveA, reserveB, exchange;
 contract("Reserve contract", (accounts) => {
+  let tokenA, tokenB, reserveA, reserveB, exchange;
   // beforeAll
   before(async () => {
     console.log("=========== Begin test ===========");
@@ -22,26 +22,6 @@ contract("Reserve contract", (accounts) => {
     await web3.eth.sendTransaction({from: accounts[0], to: reserveB.address, value: 1e6});
     assert.equal((await web3.eth.getBalance(reserveA.address)).toString(), 1e6);
     assert.equal((await web3.eth.getBalance(reserveB.address)).toString(), 1e6);
-
-    // console.log("Owner: ", accounts[0]);
-    // console.log("ReserveA owner Address: ", await reserveA.owner());
-    // console.log("ReserveB owner Address: ", await reserveB.owner());
-    // console.log("TokenA Address: ", tokenA.address);
-    // console.log("TokenB Address: ", tokenB.address);
-    // console.log("TokenA owner Address: ", await tokenA.owner());
-    // console.log("TokenB owner Address: ", await tokenB.owner());
-
-    // // get balanceOf owner
-    // const balanceOfOwnerA = await tokenA.balanceOf(accounts[0]);
-    // const balanceOfOwnerB = await tokenB.balanceOf(accounts[0]);
-    // console.log("balanceOfOwnerA: ", balanceOfOwnerA.toString());
-    // console.log("balanceOfOwnerB: ", balanceOfOwnerB.toString());
-
-    // await deployer.deploy(Exchange);
-    // const exchange = await Exchange.deployed();
-
-    // await exchange.addReserve(reserveA.address, tokenA.address, true);
-    // await exchange.addReserve(reserveB.address, tokenB.address, true);
   });
 
   // beforeEach
