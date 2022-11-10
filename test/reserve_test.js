@@ -100,7 +100,7 @@ contract("Reserve contract", (accounts) => {
         await reserveA.setExchangeRates(100, 200, { from: accounts[1] });
         assert.fail("Only owner can set exchange rate");
       } catch (error) {
-        assert.ok(/revert/.test(error.message));
+        assert.ok(/revert/i.test(error.message));
       }
     });
     it("Exchange rate should be set correctly", async () => {
@@ -108,27 +108,63 @@ contract("Reserve contract", (accounts) => {
       assert.equal((await reserveA.buyRate()), 100);
       assert.equal((await reserveA.sellRate()), 200);
     });
+    it("Event should be emitted", async () => {
+      const result = await reserveA.setExchangeRates(100, 200);
+      const log = result.logs[0];
+      assert.equal(log.event, "ExchangeRatesSet");
+      assert.equal(log.args.buyRate, 100);
+      assert.equal(log.args.sellRate, 200);
+    });
   });
 
-  describe("GetExchangeRates", () => {
-    it("Get exchange rate correctly", async () => {
+  describe("GetExchangeRate", () => {
+    it("Get BUY exchange rate correctly", async () => {
       await reserveA.setExchangeRates(100, 200);
-      assert.equal((await reserveA.getExchangeRates(true, 1)), 100);
-      assert.equal((await reserveA.getExchangeRates(false, 1)), 200);
+      assert.equal((await reserveA.getExchangeRate(true, 1)), 100);
+      assert.equal((await reserveA.getExchangeRate(true, 2)), 100);
+      assert.equal((await reserveA.getExchangeRate(true, 1)), (await reserveA.buyRate()).toNumber());
+    });
+    it("Get SELL exchange rate correctly", async () => {
+      await reserveA.setExchangeRates(100, 200);
+      assert.equal((await reserveA.getExchangeRate(false, 1)), 200);
+      assert.equal((await reserveA.getExchangeRate(false, 2)), 200);
+      assert.equal((await reserveA.getExchangeRate(false, 1)), (await reserveA.sellRate()).toNumber());
+    });
+  });
 
-  describe("Buy", () => {
-    it.only("Buy tokenA with ETH", async () => {
+  describe("Buy (calling from Exchange contract)", () => {
+    it("Buy tokenA with ETH", async () => {
       isBuy = true;
       srcAmount = 3000;
       buyRate = 100;
+      sellRate = 200;
 
-      await reserveA.setExchangeRates(100, 200);
-      assert.equal((await reserveA.buyRate()), 100);
+      await reserveA.setExchangeRates(buyRate, sellRate);
       // buy srcAmount tokenA with srcAmount ETH
-      await reserveA.exchange(isBuy, srcAmount, {from: accounts[1], value: srcAmount});
-      // check allowance
-      console.log("Allowance: ", (await tokenA.allowance(reserveA.address, accounts[1])).toString());
-      assert((await tokenA.allowance(reserveA.address, accounts[1])).toString(), srcAmount * buyRate);
+      let receiveAmount = await reserveA.exchange(isBuy, srcAmount, {from: accounts[1], value: srcAmount});
+      let allowance = await tokenA.allowance(reserveA.address, accounts[1]);
+      assert(allowance.toString(), srcAmount * buyRate);
+      assert(receiveAmount.toString(), srcAmount * buyRate);
+    });
+    it("Sell tokenA for ETH", async () => {
+      isBuy = false;
+      srcAmount = 3000;
+      buyRate = 100;
+      sellRate = 200;
+
+      // give accounts[1] 10000 tokenA
+      await tokenA.transfer(accounts[1], 10000);
+
+      await reserveA.setExchangeRates(buyRate, sellRate);
+      // sell srcAmount tokenA for srcAmount ETH
+      await tokenA.approve(reserveA.address, srcAmount, {from: accounts[1]});
+      assert.equal((await tokenA.allowance(accounts[1], reserveA.address)).toString(), srcAmount);
+
+      let beforeBalance = await web3.eth.getBalance(accounts[1]);
+      let receiveAmount = await reserveA.exchange(isBuy, srcAmount, {from: accounts[1]});
+      let afterBalance = await web3.eth.getBalance(accounts[1]);
+      assert(afterBalance.toString(), beforeBalance.toString() + srcAmount * buyRate);
+      assert(receiveAmount.toString(), srcAmount * buyRate);
     });
   });
 

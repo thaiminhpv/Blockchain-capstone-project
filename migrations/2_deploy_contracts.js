@@ -1,8 +1,12 @@
+const Utils = artifacts.require("Utils");
+
 const Exchange = artifacts.require("Exchange");
 const Reserve = artifacts.require("Reserve");
 const Token = artifacts.require("Token");
 
 module.exports = async function(deployer, network, accounts) {
+    await deployer.deploy(Utils);
+    await deployer.link(Utils, [Exchange, Reserve]);
     await deployer.deploy(Token, "TokenA", "TKA", 18);
     const tokenA = await Token.deployed();
     // const tokenB = await Token.new("TokenB", "TKB", 18);
@@ -24,12 +28,12 @@ module.exports = async function(deployer, network, accounts) {
     await exchange.addReserve(reserveA.address, tokenA.address, true);
     // await exchange.addReserve(reserveB.address, tokenB.address, true);
 
-    isBuy = true;
-    srcAmount = 3000;
-    buyRate = 100;
+    // isBuy = true;
+    // srcAmount = 3000;
+    // buyRate = 100;
 
-    await reserveA.setExchangeRates(100, 200);
-    // assert.equal((await reserveA.buyRate()), 100);
-    // buy srcAmount tokenA with srcAmount ETH
-    await reserveA.exchange(isBuy, srcAmount, {from: accounts[1], value: srcAmount});
+    // await reserveA.setExchangeRates(100, 200);
+    // // assert.equal((await reserveA.buyRate()), 100);
+    // // buy srcAmount tokenA with srcAmount ETH
+    // await reserveA.exchange(isBuy, srcAmount, {from: accounts[1], value: srcAmount});
 }
