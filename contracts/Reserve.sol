@@ -42,6 +42,8 @@ contract Reserve {
     uint256 public buyRate;
     uint256 public sellRate;
 
+    event Logger(string indexed message, address indexed sender, uint256 value);
+
     /**
       * @dev Reserve constructor
       * @param _supportedToken address of supported token
@@ -105,31 +107,32 @@ contract Reserve {
     function exchange(bool isBuy, uint256 srcAmount) public payable returns (uint256 sendBackAmount) {
         // msg.sender is Exchange contract
         uint256 rate = getExchangeRate(isBuy, srcAmount);
-        require(rate > 0, "no exchange rate");
-        if (isBuy) {
-            // receive ETH from user, and send token back to user
-            require(hasEnoughFund(isBuy, srcAmount), "not enough fund");
-            require(msg.value == srcAmount, "wrong amount of ETH");
+        emit Logger("rate", msg.sender, rate);
+        // require(rate > 0, "no exchange rate");
+        // if (isBuy) {
+        //     // receive ETH from user, and send token back to user
+        //     require(hasEnoughFund(isBuy, srcAmount), "not enough fund");
+        //     require(msg.value == srcAmount, "wrong amount of ETH");
 
-            // this Contract receive ETH from user
-            // can this be omitted! https://ethereum.stackexchange.com/questions/30868/where-does-the-rest-of-msg-value-go
-            address(this).transfer(msg.value);  // store msg.value ETH to address(this)
+        //     // this Contract receive ETH from user
+        //     // can this be omitted! https://ethereum.stackexchange.com/questions/30868/where-does-the-rest-of-msg-value-go
+        //     address(this).transfer(msg.value);  // store msg.value ETH to address(this)
             
-            // send token from this Smart Contract fund to user
-            supportedToken.approve(msg.sender, srcAmount * rate);
-        } else {
-            // selling
-            // receive `srcAmount` token from user, and send ETH back to user
-            require(hasEnoughFund(isBuy, srcAmount), "not enough fund");
+        //     // send token from this Smart Contract fund to user
+        //     supportedToken.approve(msg.sender, srcAmount * rate);
+        // } else {
+        //     // selling
+        //     // receive `srcAmount` token from user, and send ETH back to user
+        //     require(hasEnoughFund(isBuy, srcAmount), "not enough fund");
             
-            // Exchange contract should call approve function to allow Reserve to take token from Exchange contract
-            // this Contract receive token from user
-            supportedToken.transferFrom(msg.sender, address(this), srcAmount);
+        //     // Exchange contract should call approve function to allow Reserve to take token from Exchange contract
+        //     // this Contract receive token from user
+        //     supportedToken.transferFrom(msg.sender, address(this), srcAmount);
 
-            // send ETH from this Smart Contract fund to user
-            // msg.sender.transfer(srcAmount * rate); // transer srcAmount * rate ETH to msg.sender
-            msg.sender.transfer(srcAmount * rate);  // approve Exchange contract to take ETH from this Smart Contract, then transfer to User's wallet
-        }
+        //     // send ETH from this Smart Contract fund to user
+        //     // msg.sender.transfer(srcAmount * rate); // transer srcAmount * rate ETH to msg.sender
+        //     msg.sender.transfer(srcAmount * rate);  // approve Exchange contract to take ETH from this Smart Contract, then transfer to User's wallet
+        // }
         return srcAmount * rate;
     }
 
@@ -146,4 +149,6 @@ contract Reserve {
             return address(this).balance >= srcAmount * sellRate;
         }
     }
+
+    function() external payable {}
 }
