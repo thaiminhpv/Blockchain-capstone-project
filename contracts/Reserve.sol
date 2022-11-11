@@ -6,9 +6,11 @@ import "./Utils.sol";
 
 /**
     * @title Reserve
-    * @dev Reserve contract for exchanging ETH with supported token
+    * @dev Reserve contract for exchanging ETH with supported token and vice versa with Exchange contract
  */
 contract Reserve {
+    /// @dev native token address: can be ETH or TOMO
+    address public constant NATIVE_TOKEN_ADDRESS = address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     /// @dev Reserve owner: the address that can call withdrawFunds and setExchangeRates
     address public owner;
@@ -20,9 +22,6 @@ contract Reserve {
 
     event ExchangeRatesSet(uint256 buyRate, uint256 sellRate);
     event Log(string message, uint256 value);
-
-    /// @dev native token address: can be ETH or TOMO
-    address public constant NATIVE_TOKEN_ADDRESS = address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     /**
       * @dev Reserve constructor
