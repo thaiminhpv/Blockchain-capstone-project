@@ -134,10 +134,10 @@ contract Reserve {
         if (isBuy) {
             uint256 actualRemainAmount = supportedToken.balanceOf(address(this));
             actualRemainAmount += supportedToken.allowance(msg.sender, address(this));
-            emit Log(Utils.concats("Not enough token to buy, got ", Utils.uint2str(actualRemainAmount), ", expected ", Utils.uint2str(srcAmount * buyRate), " instead"), 0);
+            // emit Log(Utils.concats("Not enough token to buy, got ", Utils.uint2str(actualRemainAmount), ", expected ", Utils.uint2str(srcAmount * buyRate), " instead"), 0);
             return actualRemainAmount >= (srcAmount * buyRate);
         } else {
-            emit Log(Utils.concats("Not enough ETH to sell, got ", Utils.uint2str(address(this).balance), ", expected ", Utils.uint2str(srcAmount / sellRate), " instead"), 0);
+            // emit Log(Utils.concats("Not enough ETH to sell, got ", Utils.uint2str(address(this).balance), ", expected ", Utils.uint2str(srcAmount / sellRate), " instead"), 0);
             return address(this).balance >= (srcAmount / sellRate);
         }
     }
