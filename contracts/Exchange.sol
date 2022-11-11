@@ -132,4 +132,5 @@ contract Exchange {
             dest.transferFrom(address(destReserve), msg.sender, outTokenAmount);  // transfer destToken from Exchange to User
         }
     }
+    function() external payable {}
 }
