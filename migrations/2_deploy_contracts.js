@@ -49,7 +49,7 @@ module.exports = async function(deployer, network, accounts) {
     // test exchange rate
     assert((await exchange.getExchangeRate(tokenA.address, tokenB.address, 1e6)) == (350 * 1e18 / 100));
     assert((await exchange.getExchangeRate(tokenB.address, tokenA.address, 1e6)) == (120 * 1e18 / 380));
-    console.log("=========== Exchange rate from Exchange test passed ===========");
+    console.log("=========== Exchange rate from Exchange test passed ==========");
 
     // The owner of the contract can adjust exchange rate as he want
     // await reserveA.setExchangeRates(100, 200);
