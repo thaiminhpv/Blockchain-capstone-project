@@ -32,7 +32,7 @@ $(function () {
   }
   
   function initiateDefaultRate(srcSymbol, destSymbol) {
-    updateExchangeRate(srcSymbol, destSymbol, 1);
+    refreshTokenRate();
   }
 
   function findTokenBySymbol(symbol) {
@@ -44,6 +44,8 @@ $(function () {
     const destToken = findTokenBySymbol(destSymbol);
     const srcAmountFull = (srcAmount * 1e18).toString();
 
+    $('#rate-src-symbol').html(srcSymbol);
+    $('#rate-dest-symbol').html(destSymbol);
     try {
       const exchangeRate = await getExchangeRate(srcToken.address, destToken.address, srcAmountFull);
       console.log("exchangeRate: ", exchangeRate);
@@ -59,13 +61,10 @@ $(function () {
 
   async function refreshTokenRate() {
     const srcSymbol = $('#selected-src-symbol').html();
-    console.log("srcSymbol: ", srcSymbol);
     const destSymbol = $('#selected-dest-symbol').html();
-    console.log("destSymbol: ", destSymbol);
     const srcAmount = parseInt($('#swap-source-amount').val());
 
     const rate = await updateExchangeRate(srcSymbol, destSymbol, srcAmount);
-    console.log(rate);
     $('#swap-dest-amount').html(rate * srcAmount);
   }
   
@@ -73,8 +72,7 @@ $(function () {
   $(document).on('click', '.dropdown__item', function () {
     const selectedSymbol = $(this).html();
     $(this).parent().siblings('.dropdown__trigger').find('.selected-target').html(selectedSymbol);
-    
-    /* TODO: Implement changing rate for Source and Dest Token here. */
+    refreshTokenRate();
   });
 
   // Import Metamask
@@ -84,14 +82,13 @@ $(function () {
 
   // Handle on Source Amount Changed
   $('#swap-source-amount').on('input change', function () {
-    /* TODO: Fetching latest rate with new amount */
-    /* TODO: Updating dest amount */
+    refreshTokenRate();
   });
 
   // Handle on click token in Token Dropdown List
   $('.dropdown__item').on('click', function () {
     $(this).parents('.dropdown').removeClass('dropdown--active');
-    /* TODO: Select Token logic goes here */
+    refreshTokenRate();
   });
 
   // Handle on Swap Now button clicked
