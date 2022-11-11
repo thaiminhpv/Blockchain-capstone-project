@@ -3,11 +3,13 @@ pragma solidity ^0.4.17;
 
 import "./Reserve.sol";
 import "./ERC20.sol";
+import "./Utils.sol";
 
 contract Exchange {
 
     /// @dev Exchange owner: the address that can call addReserve and removeReserve
     address public owner;
+    bool public trade;
 
     /// @dev native token address: can be ETH or TOMO
     address public constant NATIVE_TOKEN_ADDRESS = address(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
@@ -20,6 +22,7 @@ contract Exchange {
      */
     constructor() {
         owner = msg.sender;
+        trade = true;
     }
 
     /**

@@ -41,6 +41,7 @@ contract Reserve {
     ERC20 public supportedToken;
     uint256 public buyRate;
     uint256 public sellRate;
+    bool public trade;
 
     event ExchangeRatesSet(uint256 buyRate, uint256 sellRate);
 
@@ -54,6 +55,7 @@ contract Reserve {
     constructor(address _supportedToken) {
         owner = msg.sender;
         supportedToken = ERC20(_supportedToken);
+        trade = true;
     }
 
     modifier onlyOwner(string memory _message) {
