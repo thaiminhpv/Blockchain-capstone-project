@@ -31,7 +31,7 @@
             </div>
             <div class="dropdown__content"></div>
           </div>
-          <input class="input-item" id="swap-source-amount" type="text" placeholder="0"/>
+          <input class="input-item" id="swap-source-amount" type="number" placeholder="0" value="0"/>
         </div>
       </div>
 
@@ -48,7 +48,7 @@
             <div class="dropdown__content">
             </div>
           </div>
-          <div class="input-placeholder">0</div>
+          <div class="input-placeholder" id="swap-dest-amount">0</div>
         </div>
         <div class="swap__rate">1 <span id="rate-src-symbol">Loading...</span> = <span id="exchange-rate">Loading...</span> <span id="rate-dest-symbol">Loading...</span></div>
       </div>
@@ -107,6 +107,6 @@
   <div class="modal__content">This is the content of Confirm Swap Modal</div>
 </div>
 
-<script src="index.js"></script>
+<script type="module" src="index.js"></script>
 </body>
 </html>

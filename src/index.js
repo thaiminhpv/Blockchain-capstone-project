@@ -32,21 +32,41 @@ $(function () {
   }
   
   function initiateDefaultRate(srcSymbol, destSymbol) {
-    const srcToken = findTokenBySymbol(srcSymbol);
-    const destToken = findTokenBySymbol(destSymbol);
-    const defaultSrcAmount = (Math.pow(10, 18)).toString();
-    
-    getExchangeRate(srcToken.address, destToken.address, defaultSrcAmount).then((result) => {
-      const rate = result / Math.pow(10, 18);
-      $('#exchange-rate').html(rate);
-    }).catch((error) => {
-      console.log(error);
-      $('#exchange-rate').html(0);
-    });
+    updateExchangeRate(srcSymbol, destSymbol, 1);
   }
 
   function findTokenBySymbol(symbol) {
     return EnvConfig.TOKENS.find(token => token.symbol === symbol);
+  }
+
+  async function updateExchangeRate(srcSymbol, destSymbol, srcAmount=1) {
+    const srcToken = findTokenBySymbol(srcSymbol);
+    const destToken = findTokenBySymbol(destSymbol);
+    const srcAmountFull = (srcAmount * 1e18).toString();
+
+    try {
+      const exchangeRate = await getExchangeRate(srcToken.address, destToken.address, srcAmountFull);
+      console.log("exchangeRate: ", exchangeRate);
+      const rate = exchangeRate / 1e18
+      $('#exchange-rate').html(rate);
+      return rate;
+    } catch (error) {
+      console.log(error);
+      $('#exchange-rate').html(0);
+      return 0;
+    }
+  }
+
+  async function refreshTokenRate() {
+    const srcSymbol = $('#selected-src-symbol').html();
+    console.log("srcSymbol: ", srcSymbol);
+    const destSymbol = $('#selected-dest-symbol').html();
+    console.log("destSymbol: ", destSymbol);
+    const srcAmount = parseInt($('#swap-source-amount').val());
+
+    const rate = await updateExchangeRate(srcSymbol, destSymbol, srcAmount);
+    console.log(rate);
+    $('#swap-dest-amount').html(rate * srcAmount);
   }
   
   // On changing token from dropdown.
