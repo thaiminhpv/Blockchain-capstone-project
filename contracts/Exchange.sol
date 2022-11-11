@@ -41,19 +41,33 @@ contract Exchange {
     }
 
     /**
-      * @dev Get exchange rate between 2 tokens
+      * @dev Get exchange rate * 1e18 between 2 tokens
       * @param srcToken source token address
       * @param destToken destination token address
       * @param srcAmount source amount
-      * @return exchangeRate exchange rate
+      * @return exchangeRate exchange rate * 10^18
      */
     function getExchangeRate(address srcToken, address destToken, uint256 srcAmount) public view returns (uint256) {
         Reserve srcReserve = reserves[srcToken];
         Reserve destReserve = reserves[destToken];
-        if (srcReserve == address(0) || destReserve == address(0)) return 0;
-        uint256 srcRate = srcReserve.getExchangeRate(false, srcAmount);
-        uint256 destRate = destReserve.getExchangeRate(true, srcAmount);
-        return srcRate * destRate;
+        uint256 srcRate;
+        uint256 destRate;
+
+        if (srcReserve != address(0) && destReserve != address(0)) {
+            srcRate = srcReserve.getExchangeRate(false, srcAmount);
+            destRate = destReserve.getExchangeRate(true, srcAmount);
+            return destRate * 1e18 / srcRate;
+        } else if (srcReserve != address(0) && destToken == NATIVE_TOKEN_ADDRESS) {
+            // selling token for ETH
+            srcRate = srcReserve.getExchangeRate(false, srcAmount);
+            return srcRate * 1e18;
+        } else if (srcToken == NATIVE_TOKEN_ADDRESS && destReserve != address(0)) {
+            // buying token with ETH
+            destRate = destReserve.getExchangeRate(true, srcAmount);
+            return destRate * 1e18;
+        } else {
+            revert("reserve not found");
+        }
     }
 
     /**
