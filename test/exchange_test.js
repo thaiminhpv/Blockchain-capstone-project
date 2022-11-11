@@ -101,21 +101,21 @@ contract("Exchange contract", function (accounts) {
 
     describe("Exchange token with end User", () => {
         it("User use ETH to buy TokenA", async () => {
-            let srcAmount = 1000;
+            let srcAmount = web3.utils.toWei("0.3", "ether");  // using 0.3 ETH to buy tokenA
             await reserveA.setExchangeRates(100, 200);
-            const rate = (await reserveA.buyRate()).toNumber();
+            const rate = BigInt(await reserveA.buyRate());
 
             const userBalanceBefore = await web3.eth.getBalance(accounts[1]);
-            const userTokenABalanceBefore = (await tokenA.balanceOf(accounts[1])).toNumber();
+            const userTokenABalanceBefore = BigInt(await tokenA.balanceOf(accounts[1]));
 
             await exchange.exchange(NATIVE_TOKEN, tokenA.address, srcAmount, {from: accounts[1], value: srcAmount});
 
             const userBalanceAfter = await web3.eth.getBalance(accounts[1]);
-            const userTokenABalanceAfter = await tokenA.balanceOf(accounts[1]);
+            const userTokenABalanceAfter = BigInt(await tokenA.balanceOf(accounts[1]));
 
-            assert(userBalanceAfter.toString() < (userBalanceBefore - srcAmount));
-            // console.log("Gas used: ", (userBalanceBefore - srcAmount) - userBalanceAfter);
-            assert.equal(userTokenABalanceAfter.toString(), userTokenABalanceBefore + srcAmount * rate);
+            assert(BigInt(userBalanceAfter) < (BigInt(userBalanceBefore) - BigInt(srcAmount)));
+            // console.log("Gas used: ", (BigInt(userBalanceBefore) - BigInt(srcAmount)) - BigInt(userBalanceAfter));
+            assert.equal(userTokenABalanceAfter, userTokenABalanceBefore + BigInt(srcAmount) * rate);
         });
         
         it("User use TokenA to buy ETH", async () => {
