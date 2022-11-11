@@ -7,12 +7,12 @@ contract("Exchange contract", function (accounts) {
     let tokenA, tokenB, reserveA, reserveB, exchange;
     // beforeAll
     before(async () => {
-        console.log("=========== Begin test ===========");
+        // console.log("=========== Begin test ===========");
         tokenA = await Token.new("TokenA", "TKA", 18);
         tokenB = await Token.new("TokenB", "TKB", 18);
 
-        reserveA = await Reserve.new(tokenA.address);
-        reserveB = await Reserve.new(tokenB.address);
+        reserveA = await Reserve.new(tokenA.address, 120, 100);
+        reserveB = await Reserve.new(tokenB.address, 350, 380);
 
         let amount = web3.utils.toWei("100", "ether");
         let tokenAmount = web3.utils.toWei("10000", "ether");
