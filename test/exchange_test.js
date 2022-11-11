@@ -100,7 +100,7 @@ contract("Exchange contract", function (accounts) {
     });
 
     describe("Exchange token with end User", () => {
-        it("User use ETH to buy TokenA", async () => {
+        it("User use ETH to buy Token", async () => {
             let srcAmount = web3.utils.toWei("0.3", "ether");  // using 0.3 ETH to buy tokenA
             await reserveA.setExchangeRates(100, 200);
             const rate = BigInt(await reserveA.buyRate());
@@ -118,7 +118,7 @@ contract("Exchange contract", function (accounts) {
             assert.equal(userTokenABalanceAfter, userTokenABalanceBefore + BigInt(srcAmount) * rate);
         });
         
-        it("User use TokenA to buy ETH", async () => {
+        it("User use Token to buy ETH", async () => {
             let srcAmount = web3.utils.toWei("0.3", "ether");  // using 0.3 tokenA to sell for Ether
 
             // give user @srcAmount tokenA
@@ -153,7 +153,7 @@ contract("Exchange contract", function (accounts) {
             assert.equal(userTokenABalanceAfter, userTokenABalanceBefore - BigInt(srcAmount));
         });
 
-        it("User use TokenA to buy TokenB", async () => {
+        it("User exchange Token for another type of Token", async () => {
             let srcAmount = web3.utils.toWei("0.3", "ether");  // using 0.3 tokenA to buy tokenB
 
             // give user @srcAmount tokenA
