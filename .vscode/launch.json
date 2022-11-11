@@ -5,6 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "truffle",
+            "request": "launch",
+            "name": "Debug Transaction with Truffle",
+            "stopOnEntry": false,
+            "txHash": "0x",
+            "files": [],
+            "workingDirectory": "${workspaceFolder}/",
+            "providerUrl": "http://127.0.0.1:9545"
+        },
+        {
             "type": "node",
             "runtimeVersion": "16.18.1",
             "request": "launch",
