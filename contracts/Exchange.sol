@@ -84,11 +84,11 @@ contract Exchange {
         uint256 sendBackEtherAmount;
         uint256 outTokenAmount;
 
-        require(srcReserve != address(0) && destReserve != address(0), "reserve not found");
-        require(srcReserve.supportedToken() == srcToken && destReserve.supportedToken() == destToken, "invalid reserve");
+        require(srcToken != destToken, "srcToken and destToken must be different");
         // if srcToken is ETH
         if (srcToken == NATIVE_TOKEN_ADDRESS) {
             require(msg.value == srcAmount, "msg.value != srcAmount");
+            require(destReserve != address(0), "dest reserve not found");
             dest = ERC20(destToken);
 
             // buy destToken from destReserve
@@ -103,9 +103,13 @@ contract Exchange {
             ○ Exchange transfers Y ETH back to user’s wallet (in exchange function of Exchange’s contract).
             */
             require(msg.value == 0, "msg.value != 0");
+            require(srcReserve != address(0), "src reserve not found");
             src = ERC20(srcToken);
 
-            src.transfer(address(this), srcAmount);  // receive srcToken from user
+            // check allowance
+            require(src.allowance(msg.sender, address(this)) >= srcAmount, "allowance not enough");
+            src.transferFrom(msg.sender, address(this), srcAmount);  // receive srcToken from user
+            require(src.balanceOf(address(this)) >= srcAmount, "balance not enough");
             src.approve(address(srcReserve), srcAmount);  // approve srcReserve to spend srcToken
             // isBuy=false
             sendBackEtherAmount = srcReserve.exchange(false, srcAmount);  // transfer srcToken from Exchange to Reserve
