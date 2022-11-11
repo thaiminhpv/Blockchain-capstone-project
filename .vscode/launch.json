@@ -18,11 +18,17 @@
             "type": "node",
             "runtimeVersion": "16.18.1",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Truffle test/deploy debug",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "program": "${file}"
+        },
+        {
+            "type": "chrome",
+            "request": "attach",
+            "name": "Attach to browser",
+            "port": 9222
         }
     ]
 }
