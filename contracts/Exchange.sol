@@ -5,14 +5,17 @@ import "./Reserve.sol";
 import "./ERC20.sol";
 import "./Utils.sol";
 
+/**
+    * @title Exchange
+    * @dev Exchange contract for bridging between Reserve contract and User's wallet
+ */
 contract Exchange {
+    /// @dev native token address: can be ETH or TOMO
+    address public constant NATIVE_TOKEN_ADDRESS = address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     /// @dev Exchange owner: the address that can call addReserve and removeReserve
     address public owner;
     bool public trade;
-
-    /// @dev native token address: can be ETH or TOMO
-    address public constant NATIVE_TOKEN_ADDRESS = address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     /// @dev Mapping from token to reserve
     mapping (address => Reserve) public reserves;
@@ -26,7 +29,8 @@ contract Exchange {
     }
 
     /**
-      * @dev Add or remove reserve
+      * @dev Add or remove reserve for a token
+      * only owner can call this function
       * @param reserve reserve address
       * @param token supported token address
       * @param isAdd true if add, false if remove
@@ -85,7 +89,6 @@ contract Exchange {
         uint256 outTokenAmount;
 
         require(srcToken != destToken, "srcToken and destToken must be different");
-        // if srcToken is ETH
         if (srcToken == NATIVE_TOKEN_ADDRESS) {
             require(msg.value == srcAmount, "msg.value != srcAmount");
             require(destReserve != address(0), "dest reserve not found");
@@ -96,12 +99,6 @@ contract Exchange {
             assert(dest.allowance(address(destReserve), address(this)) >= outTokenAmount);  // check allowance
             dest.transferFrom(address(destReserve), msg.sender, outTokenAmount);  // transfer destToken from Exchange to User
         } else if (destToken == NATIVE_TOKEN_ADDRESS) { 
-            /*
-            ○ X tokenA is transferred from user’s wallet to Exchange by calling exchange function in Exchange’s contract.
-            ○ X tokenA is transferred from Exchange to Reserve by calling exchange function in Reserve’s contract.
-            ○ Reserve transfers back Y ETH to Exchange (in exchange function of Reserve’s contract).
-            ○ Exchange transfers Y ETH back to user’s wallet (in exchange function of Exchange’s contract).
-            */
             require(msg.value == 0, "msg.value != 0");
             require(srcReserve != address(0), "src reserve not found");
             src = ERC20(srcToken);
@@ -111,7 +108,6 @@ contract Exchange {
             src.transferFrom(msg.sender, address(this), srcAmount);  // receive srcToken from user
             require(src.balanceOf(address(this)) >= srcAmount, "balance not enough");
             src.approve(address(srcReserve), srcAmount);  // approve srcReserve to spend srcToken
-            // isBuy=false
             sendBackEtherAmount = srcReserve.exchange(false, srcAmount);  // transfer srcToken from Exchange to Reserve
 
             // forward ETH to User
