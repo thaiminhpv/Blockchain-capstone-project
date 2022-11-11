@@ -13,7 +13,7 @@ contract("Reserve contract", (accounts) => {
     reserveA = await Reserve.new(tokenA.address);
     reserveB = await Reserve.new(tokenB.address);
 
-    let amount = web3.utils.toWei("10", "ether");
+    let amount = web3.utils.toWei("100", "ether");
     let tokenAmount = web3.utils.toWei("10000", "ether");
     // let amount = 1000
     // send @amount tokenA to reserveA and @amount tokenB to reserveB
@@ -164,15 +164,16 @@ contract("Reserve contract", (accounts) => {
   });
 
   describe("GetExchangeRate", () => {
+    let amount = web3.utils.toWei("0.3", "ether");
     it("Get BUY exchange rate correctly", async () => {
       await reserveA.setExchangeRates(100, 200);
-      assert.equal((await reserveA.getExchangeRate(true, 1e8)), 100);
-      assert.equal((await reserveA.getExchangeRate(true, 1e8)), (await reserveA.buyRate()).toNumber());
+      assert.equal((await reserveA.getExchangeRate(true, amount)), 100);
+      assert.equal((await reserveA.getExchangeRate(true, amount)), (await reserveA.buyRate()).toNumber());
     });
     it("Get SELL exchange rate correctly", async () => {
       await reserveA.setExchangeRates(100, 200);
-      assert.equal((await reserveA.getExchangeRate(false, 1e8)), 200);
-      assert.equal((await reserveA.getExchangeRate(false, 1e8)), (await reserveA.sellRate()).toNumber());
+      assert.equal((await reserveA.getExchangeRate(false, amount)), 200);
+      assert.equal((await reserveA.getExchangeRate(false, amount)), (await reserveA.sellRate()).toNumber());
     });
   });
 
