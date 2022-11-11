@@ -110,36 +110,7 @@ contract("Reserve contract", (accounts) => {
             assert.notEqual(reserveB.address, undefined);
         });
     });
-    
-    describe("Reserve contract constructor", () => {
-        it("Owner should be set correctly", async () => {
-            assert.equal(await reserveA.owner(), accounts[0]);
-            assert.equal(await reserveB.owner(), accounts[0]);
-        });
-        it("SupportedToken address should be set correctly", async () => {
-            assert.equal((await reserveA.supportedToken()), tokenA.address);
-            assert.equal((await reserveB.supportedToken()), tokenB.address);
-        });
-        it("Owner can withdraw ETH", async () => {
-            let balanceBefore = await web3.eth.getBalance(accounts[1]);
-            let reserveBalanceBefore = await web3.eth.getBalance(reserveA.address);
-            await reserveA.withdrawFunds(NATIVE_TOKEN, BigInt(reserveBalanceBefore), accounts[1], {from: accounts[0]});
-            let balanceAfter = await web3.eth.getBalance(accounts[1]);
-            let reserveBalanceAfter = await web3.eth.getBalance(reserveA.address);
-            assert.equal(BigInt(balanceAfter) - BigInt(balanceBefore), reserveBalanceBefore);
-            assert.equal(reserveBalanceAfter, 0);
-        });
-        it("Owner can withdraw token", async () => {
-            let balanceBefore = await tokenA.balanceOf(accounts[1]);
-            let reserveBalanceBefore = await tokenA.balanceOf(reserveA.address);
-            await reserveA.withdrawFunds(tokenA.address, BigInt(reserveBalanceBefore), accounts[1], {from: accounts[0]});
-            let balanceAfter = await tokenA.balanceOf(accounts[1]);
-            let reserveBalanceAfter = await tokenA.balanceOf(reserveA.address);
-            assert.equal(BigInt(balanceAfter) - BigInt(balanceBefore), reserveBalanceBefore);
-            assert.equal(reserveBalanceAfter, 0);
-        });
-    });
-    
+     
     describe("SetExchangeRates", () => {
         it("Only owner can set exchange rate", async () => {
             try {
@@ -177,5 +148,32 @@ contract("Reserve contract", (accounts) => {
         });
     });
     
-    
+    describe("Reserve contract constructor", () => {
+        it("Owner should be set correctly", async () => {
+            assert.equal(await reserveA.owner(), accounts[0]);
+            assert.equal(await reserveB.owner(), accounts[0]);
+        });
+        it("SupportedToken address should be set correctly", async () => {
+            assert.equal((await reserveA.supportedToken()), tokenA.address);
+            assert.equal((await reserveB.supportedToken()), tokenB.address);
+        });
+        it("Owner can withdraw ETH", async () => {
+            let balanceBefore = await web3.eth.getBalance(accounts[1]);
+            let reserveBalanceBefore = await web3.eth.getBalance(reserveA.address);
+            await reserveA.withdrawFunds(NATIVE_TOKEN, BigInt(reserveBalanceBefore), accounts[1], {from: accounts[0]});
+            let balanceAfter = await web3.eth.getBalance(accounts[1]);
+            let reserveBalanceAfter = await web3.eth.getBalance(reserveA.address);
+            assert.equal(BigInt(balanceAfter) - BigInt(balanceBefore), reserveBalanceBefore);
+            assert.equal(reserveBalanceAfter, 0);
+        });
+        it("Owner can withdraw token", async () => {
+            let balanceBefore = await tokenA.balanceOf(accounts[1]);
+            let reserveBalanceBefore = await tokenA.balanceOf(reserveA.address);
+            await reserveA.withdrawFunds(tokenA.address, BigInt(reserveBalanceBefore), accounts[1], {from: accounts[0]});
+            let balanceAfter = await tokenA.balanceOf(accounts[1]);
+            let reserveBalanceAfter = await tokenA.balanceOf(reserveA.address);
+            assert.equal(BigInt(balanceAfter) - BigInt(balanceBefore), reserveBalanceBefore);
+            assert.equal(reserveBalanceAfter, 0);
+        });
+    });
 });

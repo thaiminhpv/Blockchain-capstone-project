@@ -102,7 +102,7 @@ contract Reserve {
       * @return exchangeRate exchange rate
      */
     function getExchangeRate(bool isBuy, uint256 srcAmount) public view returns (uint256) {
-        if (!hasEnoughFund(isBuy, srcAmount)) return 0;  // FIXME
+        if (!hasEnoughFund(isBuy, srcAmount)) return 0;
         return isBuy ? buyRate : sellRate;
     }
 
@@ -155,14 +155,11 @@ contract Reserve {
      */
     function hasEnoughFund(bool isBuy, uint256 srcAmount) internal view returns (bool) {
         if (isBuy) {
-            // FIXME: hasEnoughFund() often return false when run Reserve Testing
             uint256 actualRemainAmount = supportedToken.balanceOf(address(this));
             actualRemainAmount += supportedToken.allowance(msg.sender, address(this));
-            require(actualRemainAmount >= (srcAmount * buyRate), Utils.concats("Not enough token to buy, got ", Utils.uint2str(actualRemainAmount), ", expected ", Utils.uint2str(srcAmount * buyRate), " instead"));
             emit Log(Utils.concats("Not enough token to buy, got ", Utils.uint2str(actualRemainAmount), ", expected ", Utils.uint2str(srcAmount * buyRate), " instead"), 0);
             return actualRemainAmount >= (srcAmount * buyRate);
         } else {
-            require(address(this).balance >= (srcAmount / sellRate), Utils.concats("Not enough ETH to sell, got ", Utils.uint2str(address(this).balance), ", expected ", Utils.uint2str(srcAmount / sellRate), " instead"));
             emit Log(Utils.concats("Not enough ETH to sell, got ", Utils.uint2str(address(this).balance), ", expected ", Utils.uint2str(srcAmount / sellRate), " instead"), 0);
             return address(this).balance >= (srcAmount / sellRate);
         }
