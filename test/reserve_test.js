@@ -139,11 +139,17 @@ contract("Reserve contract", (accounts) => {
         it("Get BUY exchange rate correctly", async () => {
             await reserveA.setExchangeRates(100, 200);
             assert.equal((await reserveA.getExchangeRate(true, amount)), 100);
-            assert.equal((await reserveA.getExchangeRate(true, amount)), (await reserveA.buyRate()).toNumber());
         });
         it("Get SELL exchange rate correctly", async () => {
             await reserveA.setExchangeRates(100, 200);
             assert.equal((await reserveA.getExchangeRate(false, amount)), 200);
+        });
+        it("Get BUY exchange rate correctly via builtin public getter", async () => {
+            await reserveA.setExchangeRates(100, 200);
+            assert.equal((await reserveA.getExchangeRate(true, amount)), (await reserveA.buyRate()).toNumber());
+        });
+        it("Get SELL exchange rate correctly via builtin public getter", async () => {
+            await reserveA.setExchangeRates(100, 200);
             assert.equal((await reserveA.getExchangeRate(false, amount)), (await reserveA.sellRate()).toNumber());
         });
     });
