@@ -47,7 +47,7 @@ contract Reserve {
     event Log(string message, uint256 value);
 
     /// @dev native token address: can be ETH or TOMO
-    address public constant NATIVE_TOKEN_ADDRESS = address(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+    address public constant NATIVE_TOKEN_ADDRESS = address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     /**
       * @dev Reserve constructor

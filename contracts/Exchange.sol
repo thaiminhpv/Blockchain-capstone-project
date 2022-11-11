@@ -12,7 +12,7 @@ contract Exchange {
     bool public trade;
 
     /// @dev native token address: can be ETH or TOMO
-    address public constant NATIVE_TOKEN_ADDRESS = address(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+    address public constant NATIVE_TOKEN_ADDRESS = address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     /// @dev Mapping from token to reserve
     mapping (address => Reserve) public reserves;
