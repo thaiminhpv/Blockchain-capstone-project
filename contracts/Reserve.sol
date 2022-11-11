@@ -53,10 +53,11 @@ contract Reserve {
       * @dev Reserve constructor
       * @param _supportedToken address of supported token
      */
-    constructor(address _supportedToken) {
+    constructor(address _supportedToken, uint256 _buyRate, uint256 _sellRate) public {
         owner = msg.sender;
         supportedToken = ERC20(_supportedToken);
         trade = true;
+        setExchangeRates(_buyRate, _sellRate);
     }
 
     modifier onlyOwner(string memory _message) {
@@ -66,6 +67,7 @@ contract Reserve {
 
     /**
       * @dev Withdraw funds from Reserve
+      * only owner can call this function
       * @param _token address of token to withdraw
       * @param _amount amount of token to withdraw
       * @param _destAddress address to send withdrawn funds to
@@ -86,6 +88,7 @@ contract Reserve {
 
     /**
       * @dev Set exchange rates
+      * only owner can call this function
       * @param _buyRate buyRate is how many tokens we can buy using 1 ETH, 
       * @param _sellRate sellRate is how many tokens you need to sell to get 1 ETH
      */
@@ -99,7 +102,7 @@ contract Reserve {
       * @dev Get exchange rate
       * @param isBuy buy or sell
       * @param srcAmount source amount
-      * @return exchangeRate exchange rate
+      * @return exchangeRate exchange rate, 0 if reserve doesn't have enough funds
      */
     function getExchangeRate(bool isBuy, uint256 srcAmount) public view returns (uint256) {
         if (!hasEnoughFund(isBuy, srcAmount)) return 0;
