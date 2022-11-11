@@ -13,20 +13,67 @@ contract("Reserve contract", (accounts) => {
     reserveA = await Reserve.new(tokenA.address);
     reserveB = await Reserve.new(tokenB.address);
 
-    // send 1e6 tokenA to reserveA and 1e6 tokenB to reserveB
-    await tokenA.transfer(reserveA.address, 1e6, {from: accounts[0]});
-    await tokenB.transfer(reserveB.address, 1e6, {from: accounts[0]});
-    assert.equal((await tokenA.balanceOf(reserveA.address)).toString(), 1e6);
-    assert.equal((await tokenB.balanceOf(reserveB.address)).toString(), 1e6);
-    // send 1e6 ETH to reserveA and 1e6 ETH to reserveB from accounts[0]
-    await web3.eth.sendTransaction({from: accounts[0], to: reserveA.address, value: 1e6});
-    await web3.eth.sendTransaction({from: accounts[0], to: reserveB.address, value: 1e6});
-    assert.equal((await web3.eth.getBalance(reserveA.address)).toString(), 1e6);
-    assert.equal((await web3.eth.getBalance(reserveB.address)).toString(), 1e6);
+    let amount = web3.utils.toWei("10", "ether");
+    let tokenAmount = web3.utils.toWei("10000", "ether");
+    // let amount = 1000
+    // send @amount tokenA to reserveA and @amount tokenB to reserveB
+    await tokenA.transfer(reserveA.address, tokenAmount, {from: accounts[0]});
+    await tokenB.transfer(reserveB.address, tokenAmount, {from: accounts[0]});
+    assert.equal((await tokenA.balanceOf(reserveA.address)).toString(), tokenAmount);
+    assert.equal((await tokenB.balanceOf(reserveB.address)).toString(), tokenAmount);
+    // send @amount ETH to reserveA and @amount ETH to reserveB from accounts[0]
+    await web3.eth.sendTransaction({from: accounts[0], to: reserveA.address, value: amount});
+    await web3.eth.sendTransaction({from: accounts[0], to: reserveB.address, value: amount});
+    assert.equal((await web3.eth.getBalance(reserveA.address)).toString(), amount);
+    assert.equal((await web3.eth.getBalance(reserveB.address)).toString(), amount);
   });
 
   // beforeEach
   beforeEach(async () => {
+  });
+
+  describe("Exchange (calling from Exchange contract)", () => {
+    it("Buy tokenA with ETH", async () => {
+      isBuy = true;
+      srcAmount = web3.utils.toWei("0.3", "ether");  // using 3 ETH to buy tokenA
+      buyRate = 100;
+      sellRate = 200;
+
+      await reserveA.setExchangeRates(buyRate, sellRate);
+      let rate = await reserveA.getExchangeRate(isBuy, srcAmount);
+      assert(rate != 0, "Run out of tokenA");
+      assert.equal(rate, buyRate, "Exchange rate should be set correctly");
+
+      // buy tokenA with srcAmount Ether
+      let receiveAmount = await reserveA.exchange(isBuy, srcAmount, {from: accounts[1], value: srcAmount});
+      let allowance = await tokenA.allowance(reserveA.address, accounts[1]);
+      assert(allowance.toString(), srcAmount * buyRate);
+      assert(receiveAmount.toString(), srcAmount * buyRate);
+    });
+    it("Sell tokenA for ETH", async () => {
+      isBuy = false;
+      srcAmount = web3.utils.toWei("0.3", "ether");  // using 3 tokenA to sell for Ether
+      buyRate = 100;
+      sellRate = 200;
+
+      // give accounts[1] 5 tokenA
+      await tokenA.transfer(accounts[1], web3.utils.toWei("0.5", "ether"));
+
+      await reserveA.setExchangeRates(buyRate, sellRate);
+      let rate = await reserveA.getExchangeRate(isBuy, srcAmount);
+      assert(rate != 0, "Run out of ETH");
+      assert.equal(rate, sellRate, "Exchange rate should be set correctly");
+
+      // sell srcAmount tokenA for srcAmount ETH
+      await tokenA.approve(reserveA.address, srcAmount, {from: accounts[1]});
+      assert.equal((await tokenA.allowance(accounts[1], reserveA.address)).toString(), srcAmount);
+
+      let beforeBalance = await web3.eth.getBalance(accounts[1]);
+      let receiveAmount = await reserveA.exchange(isBuy, srcAmount, {from: accounts[1]});
+      let afterBalance = await web3.eth.getBalance(accounts[1]);
+      assert(afterBalance.toString(), beforeBalance.toString() + srcAmount * buyRate);
+      assert(receiveAmount.toString(), srcAmount * buyRate);
+    });
   });
 
   describe("Contract deployment", () => {
@@ -119,52 +166,15 @@ contract("Reserve contract", (accounts) => {
   describe("GetExchangeRate", () => {
     it("Get BUY exchange rate correctly", async () => {
       await reserveA.setExchangeRates(100, 200);
-      assert.equal((await reserveA.getExchangeRate(true, 1)), 100);
-      assert.equal((await reserveA.getExchangeRate(true, 2)), 100);
-      assert.equal((await reserveA.getExchangeRate(true, 1)), (await reserveA.buyRate()).toNumber());
+      assert.equal((await reserveA.getExchangeRate(true, 1e8)), 100);
+      assert.equal((await reserveA.getExchangeRate(true, 1e8)), (await reserveA.buyRate()).toNumber());
     });
     it("Get SELL exchange rate correctly", async () => {
       await reserveA.setExchangeRates(100, 200);
-      assert.equal((await reserveA.getExchangeRate(false, 1)), 200);
-      assert.equal((await reserveA.getExchangeRate(false, 2)), 200);
-      assert.equal((await reserveA.getExchangeRate(false, 1)), (await reserveA.sellRate()).toNumber());
+      assert.equal((await reserveA.getExchangeRate(false, 1e8)), 200);
+      assert.equal((await reserveA.getExchangeRate(false, 1e8)), (await reserveA.sellRate()).toNumber());
     });
   });
 
-  describe("Exchange (calling from Exchange contract)", () => {
-    it("Buy tokenA with ETH", async () => {
-      isBuy = true;
-      srcAmount = 3000;
-      buyRate = 100;
-      sellRate = 200;
-
-      await reserveA.setExchangeRates(buyRate, sellRate);
-      // buy srcAmount tokenA with srcAmount ETH
-      let receiveAmount = await reserveA.exchange(isBuy, srcAmount, {from: accounts[1], value: srcAmount});
-      let allowance = await tokenA.allowance(reserveA.address, accounts[1]);
-      assert(allowance.toString(), srcAmount * buyRate);
-      assert(receiveAmount.toString(), srcAmount * buyRate);
-    });
-    it("Sell tokenA for ETH", async () => {
-      isBuy = false;
-      srcAmount = 3000;
-      buyRate = 100;
-      sellRate = 200;
-
-      // give accounts[1] 10000 tokenA
-      await tokenA.transfer(accounts[1], 10000);
-
-      await reserveA.setExchangeRates(buyRate, sellRate);
-      // sell srcAmount tokenA for srcAmount ETH
-      await tokenA.approve(reserveA.address, srcAmount, {from: accounts[1]});
-      assert.equal((await tokenA.allowance(accounts[1], reserveA.address)).toString(), srcAmount);
-
-      let beforeBalance = await web3.eth.getBalance(accounts[1]);
-      let receiveAmount = await reserveA.exchange(isBuy, srcAmount, {from: accounts[1]});
-      let afterBalance = await web3.eth.getBalance(accounts[1]);
-      assert(afterBalance.toString(), beforeBalance.toString() + srcAmount * buyRate);
-      assert(receiveAmount.toString(), srcAmount * buyRate);
-    });
-  });
 
 });
