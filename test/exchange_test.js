@@ -119,32 +119,38 @@ contract("Exchange contract", function (accounts) {
         });
         
         it("User use TokenA to buy ETH", async () => {
-            let srcAmount = 1000;
+            let srcAmount = web3.utils.toWei("0.3", "ether");  // using 0.3 tokenA to sell for Ether
 
-            // give user 10000 tokenA
-            await tokenA.transfer(accounts[1], 10000);
+            // give user @srcAmount tokenA
+            await tokenA.transfer(accounts[1], srcAmount);
 
             await reserveA.setExchangeRates(100, 200);
             const rate = (await reserveA.sellRate()).toNumber();
 
-            const userBalanceBefore = await web3.eth.getBalance(accounts[1]);
-            const userTokenABalanceBefore = (await tokenA.balanceOf(accounts[1])).toNumber();
+            let userBalanceBefore = await web3.eth.getBalance(accounts[1]);
+            let userTokenABalanceBefore = BigInt(await tokenA.balanceOf(accounts[1]));
 
-            console.log("userBalanceBefore: ", userBalanceBefore);
-            console.log("userTokenABalanceBefore: ", userTokenABalanceBefore);
+            // console.log("userBalanceBefore: ", BigInt(userBalanceBefore));
+            // console.log("ReserveA balance before: ", BigInt(await web3.eth.getBalance(reserveA.address)));
+            // console.log("ReserveA tokenA balance before: ", BigInt(await tokenA.balanceOf(reserveA.address)));
+
             await tokenA.approve(exchange.address, srcAmount, {from: accounts[1]});
-            assert((await tokenA.allowance(accounts[1], exchange.address)).toNumber() >= srcAmount);
-            // await tokenA.transfer(exchange.address, srcAmount, {from: accounts[1]});
+            assert(BigInt(await tokenA.allowance(accounts[1], exchange.address)) >= srcAmount);
+
             await exchange.exchange(tokenA.address, NATIVE_TOKEN, srcAmount, {from: accounts[1]});
 
-            const userBalanceAfter = await web3.eth.getBalance(accounts[1]);
-            const userTokenABalanceAfter = (await tokenA.balanceOf(accounts[1])).toNumber();
+            let userBalanceAfter = await web3.eth.getBalance(accounts[1]);
+            let userTokenABalanceAfter = BigInt(await tokenA.balanceOf(accounts[1]));
 
-            console.log("userBalanceAfter: ", userBalanceAfter.toString());
-            console.log("userTokenABalanceAfter: ", userTokenABalanceAfter.toString());
+            // console.log("------");
+            // console.log("userBalanceAfter: ", BigInt(userBalanceAfter));
+            // console.log("ReserveA balance after: ", BigInt(await web3.eth.getBalance(reserveA.address)));
+            // console.log("ReserveA tokenA balance after: ", BigInt(await tokenA.balanceOf(reserveA.address)));
 
-            console.log("userTokenABalanceAfter - userTokenABalanceBefore= ", userTokenABalanceAfter, " - ", userTokenABalanceBefore, " = ", userTokenABalanceAfter - userTokenABalanceBefore);
-            assert.equal(userTokenABalanceAfter, userTokenABalanceBefore - srcAmount);
+            // console.log("User gain amount: ", BigInt(userBalanceAfter) - BigInt(userBalanceBefore));
+            // console.log("Expected gain amount: ", BigInt(srcAmount / rate));
+            // console.log("Gas used: ", BigInt(srcAmount / rate) - (BigInt(userBalanceAfter) - BigInt(userBalanceBefore)));
+            assert.equal(userTokenABalanceAfter, userTokenABalanceBefore - BigInt(srcAmount));
         });
     });
 });
