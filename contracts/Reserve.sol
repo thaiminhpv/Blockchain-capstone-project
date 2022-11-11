@@ -44,6 +44,9 @@ contract Reserve {
 
     event ExchangeRatesSet(uint256 buyRate, uint256 sellRate);
 
+    /// @dev native token address: can be ETH or TOMO
+    address public constant NATIVE_TOKEN_ADDRESS = address(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+
     /**
       * @dev Reserve constructor
       * @param _supportedToken address of supported token
@@ -66,7 +69,7 @@ contract Reserve {
      */
     function withdrawFunds(address _token, uint256 _amount, address _destAddress) public onlyOwner("withdraw funds") {
         // transfer all token and ETH to destAddress
-        if (_token == address(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)) {
+        if (_token == NATIVE_TOKEN_ADDRESS) {
           // ETH
           _destAddress.transfer(_amount);
         } else if (_token == address(supportedToken)) {
@@ -152,6 +155,14 @@ contract Reserve {
         } else {
           return address(this).balance >= srcAmount * sellRate;
         }
+    }
+
+    function balanceETH() public view returns (uint256) {
+        return address(this).balance;
+    }
+
+    function balanceToken() public view returns (uint256) {
+        return supportedToken.balanceOf(address(this));
     }
 
     function() external payable {}
