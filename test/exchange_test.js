@@ -59,19 +59,19 @@ contract("Exchange contract", function (accounts) {
             }
 
         });
-        it("Add reserve", async () => {
-            await exchange.addReserve(reserveA.address, tokenA.address, true);
-            await exchange.addReserve(reserveB.address, tokenB.address, true);
-
-            assert.equal((await exchange.reserves(tokenA.address)).toString(), reserveA.address);
-            assert.equal((await exchange.reserves(tokenB.address)).toString(), reserveB.address);
-        });
         it("Remove reserve", async () => {
             await exchange.addReserve(reserveA.address, tokenA.address, false);
             await exchange.addReserve(reserveB.address, tokenB.address, false);
 
             assert.equal((await exchange.reserves(tokenA.address)).toString(), "0x0000000000000000000000000000000000000000");
             assert.equal((await exchange.reserves(tokenB.address)).toString(), "0x0000000000000000000000000000000000000000");
+        });
+        it("Add reserve", async () => {
+            await exchange.addReserve(reserveA.address, tokenA.address, true);
+            await exchange.addReserve(reserveB.address, tokenB.address, true);
+
+            assert.equal((await exchange.reserves(tokenA.address)).toString(), reserveA.address);
+            assert.equal((await exchange.reserves(tokenB.address)).toString(), reserveB.address);
         });
     });
 
