@@ -123,16 +123,13 @@ contract Exchange {
             dest = ERC20(destToken);
 
             // sell srcToken to srcReserve
-            // src.transferFrom(msg.sender, address(this), srcAmount);  // what msg.sender in transferFrom? (not the one in param)
-            src.transfer(address(this), srcAmount);  // receive srcToken from user
+            src.transferFrom(msg.sender, address(this), srcAmount);  // receive srcToken from user 
             src.approve(address(srcReserve), srcAmount);  // approve srcReserve to spend srcToken
-            // isBuy=false
             sendBackEtherAmount = srcReserve.exchange(false, srcAmount);  // transfer srcToken from Exchange to Reserve
-            // ~forward ETH to User~
             
             // buy destToken from destReserve
             outTokenAmount = destReserve.exchange.value(sendBackEtherAmount)(true, sendBackEtherAmount);  // transfer ETH from Reserve to Exchange
-            assert(dest.allowance(address(destReserve), address(this)) >= outTokenAmount);  // check allowance
+            require(dest.allowance(address(destReserve), address(this)) >= outTokenAmount, "not enough allowance");  // check allowance
             dest.transferFrom(address(destReserve), msg.sender, outTokenAmount);  // transfer destToken from Exchange to User
         }
     }

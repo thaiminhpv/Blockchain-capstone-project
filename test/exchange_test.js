@@ -152,5 +152,31 @@ contract("Exchange contract", function (accounts) {
             // console.log("Gas used: ", BigInt(srcAmount / rate) - (BigInt(userBalanceAfter) - BigInt(userBalanceBefore)));
             assert.equal(userTokenABalanceAfter, userTokenABalanceBefore - BigInt(srcAmount));
         });
+
+        it("User use TokenA to buy TokenB", async () => {
+            let srcAmount = web3.utils.toWei("0.3", "ether");  // using 0.3 tokenA to buy tokenB
+
+            // give user @srcAmount tokenA
+            await tokenA.transfer(accounts[1], srcAmount);
+
+            await reserveA.setExchangeRates(100, 200);
+            await reserveB.setExchangeRates(500, 700);
+
+            const rateAB = await exchange.getExchangeRate(tokenA.address, tokenB.address, srcAmount);
+
+            let userTokenABalanceBefore = BigInt(await tokenA.balanceOf(accounts[1]));
+            let userTokenBBalanceBefore = BigInt(await tokenB.balanceOf(accounts[1]));
+            
+            await tokenA.approve(exchange.address, srcAmount, {from: accounts[1]});
+            assert(BigInt(await tokenA.allowance(accounts[1], exchange.address)) >= srcAmount);
+
+            await exchange.exchange(tokenA.address, tokenB.address, srcAmount, {from: accounts[1]});
+
+            let userTokenABalanceAfter = BigInt(await tokenA.balanceOf(accounts[1]));
+            let userTokenBBalanceAfter = BigInt(await tokenB.balanceOf(accounts[1]));
+
+            assert.equal(userTokenABalanceAfter, userTokenABalanceBefore - BigInt(srcAmount));
+            assert.equal(userTokenBBalanceAfter, userTokenBBalanceBefore + BigInt(srcAmount * rateAB / 1e18));
+        });
     });
 });
