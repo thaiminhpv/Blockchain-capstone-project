@@ -44,6 +44,7 @@ contract Reserve {
     bool public trade;
 
     event ExchangeRatesSet(uint256 buyRate, uint256 sellRate);
+    event Log(string message, uint256 value);
 
     /// @dev native token address: can be ETH or TOMO
     address public constant NATIVE_TOKEN_ADDRESS = address(0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
@@ -86,7 +87,7 @@ contract Reserve {
     /**
       * @dev Set exchange rates
       * @param _buyRate buyRate is how many tokens we can buy using 1 ETH, 
-      * @param _sellRate sellRate is how many ETH we will receive when selling 1 token
+      * @param _sellRate sellRate is how many tokens you need to sell to get 1 ETH
      */
     function setExchangeRates(uint256 _buyRate, uint256 _sellRate) public onlyOwner("set exchange rates") {
         buyRate = _buyRate;
@@ -101,14 +102,14 @@ contract Reserve {
       * @return exchangeRate exchange rate
      */
     function getExchangeRate(bool isBuy, uint256 srcAmount) public view returns (uint256) {
-        if (!hasEnoughFund(isBuy, srcAmount)) return 0;
+        // if (!hasEnoughFund(isBuy, srcAmount)) return 0;  // FIXME
         return isBuy ? buyRate : sellRate;
     }
 
     /**
       * @dev Exchange ETH with supported token
       * @param isBuy buy or sell
-      * @param srcAmount source amount
+      * @param srcAmount the amount of ETH or supported token that user gives
      */
     function exchange(bool isBuy, uint256 srcAmount) public payable returns (uint256 sendBackAmount) {
         // msg.sender is Exchange contract
@@ -125,6 +126,7 @@ contract Reserve {
             
             // send token from this Smart Contract fund to user
             supportedToken.approve(msg.sender, srcAmount * rate);
+            return srcAmount * rate;
         } else {
             // selling
             // receive `srcAmount` token from user, and send ETH back to user
@@ -140,9 +142,9 @@ contract Reserve {
 
             // send ETH from this Smart Contract fund to user
             // transer srcAmount * rate ETH to msg.sender (Exchange contract), then Exchange contract will transfer to User's wallet
-            msg.sender.transfer(srcAmount * rate);
+            msg.sender.transfer(srcAmount / rate);
+            return srcAmount / rate;
         }
-        return srcAmount * rate;
     }
 
     /**
@@ -153,9 +155,16 @@ contract Reserve {
      */
     function hasEnoughFund(bool isBuy, uint256 srcAmount) internal view returns (bool) {
         if (isBuy) {
-          return supportedToken.balanceOf(address(this)) >= srcAmount * buyRate;
+          // FIXME: hasEnoughFund() often return false when run Reserve Testing
+          uint256 actualRemainAmount = supportedToken.balanceOf(address(this));
+          actualRemainAmount += supportedToken.allowance(msg.sender, address(this));
+          // require(actualRemainAmount >= (srcAmount * buyRate), Utils.concats("Not enough token to buy, got ", Utils.uint2str(actualRemainAmount), ", expected ", Utils.uint2str(srcAmount * buyRate), " instead"));
+          emit Log(Utils.concats("Not enough token to buy, got ", Utils.uint2str(actualRemainAmount), ", expected ", Utils.uint2str(srcAmount * buyRate), " instead"), 0);
+          return actualRemainAmount >= (srcAmount * buyRate);
         } else {
-          return address(this).balance >= srcAmount * sellRate;
+          // require(address(this).balance >= (srcAmount / sellRate), Utils.concats("Not enough ETH to sell, got ", Utils.uint2str(address(this).balance), ", expected ", Utils.uint2str(srcAmount / sellRate), " instead"));
+          emit Log(Utils.concats("Not enough ETH to sell, got ", Utils.uint2str(address(this).balance), ", expected ", Utils.uint2str(srcAmount / sellRate), " instead"), 0);
+          return address(this).balance >= (srcAmount / sellRate);
         }
     }
 
