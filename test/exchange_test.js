@@ -14,16 +14,19 @@ contract("Exchange contract", function (accounts) {
         reserveA = await Reserve.new(tokenA.address);
         reserveB = await Reserve.new(tokenB.address);
 
-        // send 1e6 tokenA to reserveA and 1e6 tokenB to reserveB
-        await tokenA.transfer(reserveA.address, 1e6, {from: accounts[0]});
-        await tokenB.transfer(reserveB.address, 1e6, {from: accounts[0]});
-        assert.equal((await tokenA.balanceOf(reserveA.address)).toString(), 1e6);
-        assert.equal((await tokenB.balanceOf(reserveB.address)).toString(), 1e6);
-        // send 1e6 ETH to reserveA and 1e6 ETH to reserveB from accounts[0]
-        await web3.eth.sendTransaction({from: accounts[0], to: reserveA.address, value: 1e6});
-        await web3.eth.sendTransaction({from: accounts[0], to: reserveB.address, value: 1e6});
-        assert.equal((await web3.eth.getBalance(reserveA.address)).toString(), 1e6);
-        assert.equal((await web3.eth.getBalance(reserveB.address)).toString(), 1e6);
+        let amount = web3.utils.toWei("100", "ether");
+        let tokenAmount = web3.utils.toWei("10000", "ether");
+        // let amount = 1000
+        // send @amount tokenA to reserveA and @amount tokenB to reserveB
+        await tokenA.transfer(reserveA.address, tokenAmount, {from: accounts[0]});
+        await tokenB.transfer(reserveB.address, tokenAmount, {from: accounts[0]});
+        assert.equal((await tokenA.balanceOf(reserveA.address)).toString(), tokenAmount);
+        assert.equal((await tokenB.balanceOf(reserveB.address)).toString(), tokenAmount);
+        // send @amount ETH to reserveA and @amount ETH to reserveB from accounts[0]
+        await web3.eth.sendTransaction({from: accounts[0], to: reserveA.address, value: amount});
+        await web3.eth.sendTransaction({from: accounts[0], to: reserveB.address, value: amount});
+        assert.equal((await web3.eth.getBalance(reserveA.address)).toString(), amount);
+        assert.equal((await web3.eth.getBalance(reserveB.address)).toString(), amount);
 
         exchange = await Exchange.deployed();
 
@@ -77,13 +80,22 @@ contract("Exchange contract", function (accounts) {
 
     describe("Exchange rates between 2 tokens", () => {
         it("Get exchange rate", async () => {
-            let srcAmount = 1000;
+            let srcAmount = 1_000_000;
+            // sell 1_000_000 tokenA for 2_500_000 tokenB
+            // first, sell 1_000_000 tokenA for 1_000_000 / 200 = 5_000 Ether
+            // then, sell 5_000 Ether for 5_000 * 500 = 2_500_000 tokenB
+            // rate = 500 / 200 = 2.5
+
             await reserveA.setExchangeRates(100, 200);
             await reserveB.setExchangeRates(500, 700);
+
+            assert.equal(await reserveA.getExchangeRate(true, srcAmount), 100);
+            assert.equal(await reserveB.getExchangeRate(false, srcAmount), 700);
+
             const rateAB = await exchange.getExchangeRate(tokenA.address, tokenB.address, srcAmount);
             const rateBA = await exchange.getExchangeRate(tokenB.address, tokenA.address, srcAmount);
-            assert.equal(rateAB.toString(), 200 * 500); // sell 1000 tokenA for 200 ETH, then use 200 ETH to buy 200 * 500 = 100000 tokenB
-            assert.equal(rateBA.toString(), 100 * 700); // sell 1000 tokenB for 700 ETH, then use 700 ETH to buy 100 * 700 = 70000 tokenA
+            assert.equal(rateAB, 500 * 1e18 / 200);
+            assert.equal(rateBA, 100 * 1e18 / 700);
         });
     });
 
