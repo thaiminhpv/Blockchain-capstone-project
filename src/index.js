@@ -91,6 +91,15 @@ $(function () {
     refreshTokenRate();
   });
 
+  // Handle on Swap Icon div clicked
+  $('.swap__icon').on('click', function () {
+    const srcSymbol = $('#selected-src-symbol').html();
+    const destSymbol = $('#selected-dest-symbol').html();
+    initiateSelectedToken(destSymbol, srcSymbol);
+    initiateDefaultRate(destSymbol, srcSymbol);
+  });
+
+
   // Handle on Swap Now button clicked
   $('#swap-button').on('click', function () {
     const modalId = $(this).data('modal-id');
