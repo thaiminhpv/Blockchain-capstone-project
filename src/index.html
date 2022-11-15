@@ -137,7 +137,20 @@
 </div>
 
 <div class="modal" id="confirm-swap-modal">
-  <div class="modal__content">This is the content of Confirm Swap Modal</div>
+  <div class="modal__content">
+    <div class="modal__title"><h1>CONFIRM SWAP</h1></div>
+    <div class="modal__token">
+      <div class="src-swap">1 TOMO</div>
+      <img src="/assets/images/icons/arrow-right.svg" alt="">
+      <div class="dest-swap">0.29 TKA</div>
+    </div>
+    <div class="modal__rate"><span class="src-swap">1 TOMO</span> = <span class="dest-swap">0.29 TKA</span></div>
+    <div class="modal__fee">GAS Fee: <span id="gas-amount">0.0001 TOMO</span></div>
+    <div class="modal__button">
+        <div class="modal__cancel" data-modal-id="confirm-swap-modal">Cancel</div>
+        <div class="modal__confirm" data-modal-id="confirm-swap-modal">Confirm</div>
+    </div>
+  </div>
 </div>
 
 <script type="module" src="index.js"></script>

@@ -252,6 +252,87 @@ input {
   max-width: 100%;
   padding: 20px 50px;
 }
+
+.modal__title {
+  color: #4a5675;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.modal__token {
+  color: #252e45;
+  font-size: 18px;
+  font-weight: 500;
+  margin: 20px -50px;
+  background: #e1e1e1;
+  padding: 30px;
+}
+.modal__token > div {
+  float: left;
+}
+.modal__token > div:first-child {
+  width: 30%;
+}
+.modal__token > div:last-child {
+  width: 30%;
+  float: right;
+}
+
+.modal__arrow {
+  /*margin-bottom: 20px;*/
+}
+
+.modal__rate {
+  color: #4a5675;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.modal__fee {
+  color: #7a82a9;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.modal__cancel {
+  width: 200px;
+  height: 50px;
+  line-height: 50px;
+  border-radius: 27px;
+  border: 1px solid #dedede;
+  font-size: 14px;
+  font-weight: 500;
+  color: #80849c;
+  margin-right: 20px;
+  float: left;
+}
+
+.modal__confirm {
+  width: 200px;
+  height: 50px;
+  line-height: 50px;
+  float: right;
+  background: linear-gradient(180deg, #36cef9, #279df4) 0 100%;
+  background-size: auto 150%;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  /*padding: 10px 20px;*/
+  border-radius: 27px;
+  cursor: pointer;
+  transition: all .3s;
+}
+
+.modal__button {
+  width: 100%;
+  height: 60px;
+}
+
 /*========= End Modal =========*/
 
 /*========= Input =========*/
