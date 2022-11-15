@@ -1,5 +1,7 @@
 import exchange_abi from '../services/abi/Exchange.json';
 
+const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+
 const EnvConfig = {
   // RPC_ENDPOINT: 'https://rpc.testnet.tomochain.com',
   RPC_ENDPOINT: 'http://localhost:8545',
@@ -7,13 +9,14 @@ const EnvConfig = {
   /* TODO: You should change these configurations with your deployed exchange contract instead */
   EXCHANGE_CONTRACT_ABI: exchange_abi.abi,
   EXCHANGE_CONTRACT_ADDRESS: '0x0BBE5B854d8638f6785B22E6b61d3B35F74a755a',
+  NATIVE_TOKEN_ADDRESS: NATIVE_TOKEN_ADDRESS,
   /* END TODO */
 
   TOKENS: [
     {
       "name": 'TomoChain',
       "symbol": 'TOMO',
-      address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      address: NATIVE_TOKEN_ADDRESS,
     },
     /* TODO: Change to your own deployed tokens. Remember to put 2 tokens here to support token to token swapping */
     {
