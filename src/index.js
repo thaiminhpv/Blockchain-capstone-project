@@ -1,5 +1,9 @@
-import { getExchangeRate } from "./services/networkService";
+import {getExchangeRate} from "./services/networkService";
 import EnvConfig from "./configs/env";
+import AppConfig from "./configs/app";
+import MetamaskService from "./services/accounts/MetamaskService";
+
+const metamaskService = new MetamaskService(window.web3);
 
 const initiateDropdown = () => {
   let dropdownTokens = '';
@@ -54,6 +58,17 @@ const initiateDefaultRate = (srcSymbol, destSymbol) => {
 };
 
 const findTokenBySymbol = symbol => EnvConfig.TOKENS.find(token => token.symbol === symbol);
+const findTokenByRawName = rawName => EnvConfig.TOKENS.find((token) => `${token.name} (${token.symbol})` === rawName);
+
+const refreshUserBalance = (tokenBalances) => {
+  const tokenRawName = $('#wallet-token').val();
+  const token = findTokenByRawName(tokenRawName);
+  if (token) {
+    const tokenBalance = tokenBalances[token.symbol] / 1e18;
+    console.log(`Token balance of ${token.symbol}: ${tokenBalance}`);
+    $('#wallet-balance').val(tokenBalance);
+  }
+}
 
 const initiateProject = () => {
   const defaultSrcSymbol = EnvConfig.TOKENS[0].symbol;
@@ -75,9 +90,34 @@ $(function () {
   });
 
   // Import Metamask
-  $('#import-metamask').on('click', function () {
+  $('#import-metamask').on('click', async function () {
     /* TODO: Importing wallet by Metamask goes here. */
+    // metamaskService.addCustomTokenToMetamask(EnvConfig.TOKENS[1]);
+    // metamaskService.addCustomTokenToMetamask(EnvConfig.TOKENS[2]);
+
+    await metamaskService.connectWallet();
+    $('#wallet-address').val(metamaskService.getAccount());
+    $('.side-content').show();
+
+    // Start background fetch balance worker.
+    console.log("Start background fetch balance worker");
+    metamaskService.startBackgroundFetchBalanceWorker((tokenBalances) => {
+      console.log("Background fetch balance worker: ", tokenBalances);
+      refreshUserBalance(tokenBalances);
+    });
   });
+
+  $('#wallet-token').on('input', function () {
+    // force update
+    metamaskService.updateTokenBalances().then((tokenBalances) => {
+      refreshUserBalance(tokenBalances);
+    });
+  });
+
+  $('#wallet-token').on('click', function () {
+    $(this).val(''); // clear the input
+  });
+
 
   // Handle on Source Amount Changed
   $('#swap-source-amount').on('input change', function () {
