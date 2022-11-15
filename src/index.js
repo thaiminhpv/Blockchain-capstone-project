@@ -101,6 +101,15 @@ function initiateProject() {
   initiateDefaultRate(defaultSrcSymbol, defaultDestSymbol);
 }
 
+function validateSourceAmount() {
+  const sourceAmount = $('#swap-source-amount').val();
+  // filter everything except numbers and dot
+  console.log("Source Amount before: ", sourceAmount);
+  const filteredSourceAmount = sourceAmount.replace(/[^0-9.]/g, '');
+  console.log(`Source Amount after: ${filteredSourceAmount}`);
+  $('#swap-source-amount').val(filteredSourceAmount);
+}
+
 $(function () {
   initiateProject();
 
@@ -141,6 +150,7 @@ $(function () {
   // Handle on Source Amount Changed
   $('#swap-source-amount').on('input change', function () {
     refreshTokenRate();
+    validateSourceAmount();
   });
 
   // Handle on click token in Token Dropdown List
