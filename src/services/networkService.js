@@ -1,4 +1,5 @@
-import { getExchangeContract } from "./web3Service";
+import {getExchangeContract, getTokenContract, getWeb3Instance} from "./web3Service";
+import EnvConfig from "../configs/env";
 
 export function getSwapABI(data) {
   /*TODO: Get Swap ABI*/
@@ -29,6 +30,12 @@ export function getExchangeRate(srcTokenAddress, destTokenAddress, srcAmount) {
   })
 }
 
-export async function getTokenBalances(tokens, address) {
-  /*TODO: Get Token Balance*/
+export async function getTokenBalances(tokenAddress, accountAddress) {
+  if (tokenAddress === EnvConfig.NATIVE_TOKEN_ADDRESS) {
+    const web3 = getWeb3Instance();
+    return await web3.eth.getBalance(accountAddress);
+  } else {
+    const tokenContract = getTokenContract(tokenAddress);
+    return await tokenContract.methods.balanceOf(accountAddress).call();  // call() used for read-only functions
+  }
 }
