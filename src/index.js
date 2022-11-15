@@ -1,6 +1,5 @@
 import {getExchangeRate} from "./services/networkService";
 import EnvConfig from "./configs/env";
-import AppConfig from "./configs/app";
 import MetamaskService from "./services/accounts/MetamaskService";
 import {getWeb3Instance} from "./services/web3Service";
 
@@ -37,17 +36,12 @@ const updateExchangeRate = async (srcSymbol, destSymbol, srcAmount=1) => {
   const destToken = findTokenBySymbol(destSymbol);
   const srcAmountFull = BigInt(srcAmount * 1e18);
 
-  $('#rate-src-symbol').html(srcSymbol);
-  $('#rate-dest-symbol').html(destSymbol);
   try {
     const exchangeRate = await getExchangeRate(srcToken.address, destToken.address, srcAmountFull);
     console.log(`Exchange rate of ${srcSymbol}->${destSymbol}: ${exchangeRate}`);
-    const rate = web3.utils.fromWei(exchangeRate, 'ether');
-    $('#exchange-rate').html(rate);
-    return rate;
+    return web3.utils.fromWei(exchangeRate, 'ether');
   } catch (error) {
-    console.log(error);
-    $('#exchange-rate').html(0);
+    console.error(error);
     return 0;
   }
 };
@@ -59,10 +53,15 @@ const refreshTokenRate = async () => {
 
   const rate = await updateExchangeRate(srcSymbol, destSymbol, srcAmount);
   const destAmount = srcAmount * rate;
+
+  $('#rate-src-symbol').html(srcSymbol);
+  $('#rate-dest-symbol').html(destSymbol);
   $('#swap-dest-amount').html(destAmount);
+  $('#exchange-rate').html(rate);
 
   $('.src-swap').html(`${srcAmount} ${srcSymbol}`);
   $('.dest-swap').html(`${destAmount} ${destSymbol}`);
+  $('.rate-swap').html(`1 ${srcSymbol} = ${rate} ${destSymbol}`);
   const gas = web3.utils.fromWei(await getWeb3Instance().eth.getGasPrice(), 'ether');
   console.log(`Gas price: ${gas}`);
   $('#gas-amount').html(`${gas} ${EnvConfig.TOKENS[0].symbol}`);
