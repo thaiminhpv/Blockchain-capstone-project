@@ -35,14 +35,14 @@ const initiateSelectedToken = (srcSymbol, destSymbol) => {
 const updateExchangeRate = async (srcSymbol, destSymbol, srcAmount=1) => {
   const srcToken = findTokenBySymbol(srcSymbol);
   const destToken = findTokenBySymbol(destSymbol);
-  const srcAmountFull = (srcAmount * 1e18).toString();
+  const srcAmountFull = BigInt(srcAmount * 1e18);
 
   $('#rate-src-symbol').html(srcSymbol);
   $('#rate-dest-symbol').html(destSymbol);
   try {
     const exchangeRate = await getExchangeRate(srcToken.address, destToken.address, srcAmountFull);
     console.log(`Exchange rate of ${srcSymbol}->${destSymbol}: ${exchangeRate}`);
-    const rate = exchangeRate / 1e18
+    const rate = web3.utils.fromWei(exchangeRate, 'ether');
     $('#exchange-rate').html(rate);
     return rate;
   } catch (error) {
