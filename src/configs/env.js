@@ -20,11 +20,13 @@ const EnvConfig = {
       "name": 'TokenA',
       "symbol": 'TKA',
       address: '0x5111031586BD3ED0177C11F5A58981b012b30424',
+      "image": "https://cloudflare-ipfs.com/ipfs/QmYAJ3e15YtncwfYKXKzW6soSZtTeLNpf6Lyf2JAZUG4wJ#x-ipfs-companion-no-redirect",
     },
     {
       "name": 'TokenB',
       "symbol": 'TKB',
       address: '0x0dAd3CdFa49aDd1dB0Db94c0c7EE343B894c93FF',
+      "image": "https://cloudflare-ipfs.com/ipfs/QmbTcARAN62swednuJLL8ariSyfUAGenJrREBaYZXyzxYG#x-ipfs-companion-no-redirect",
     },
     /* END TODO */
   ],
