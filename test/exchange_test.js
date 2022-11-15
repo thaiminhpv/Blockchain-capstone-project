@@ -79,7 +79,36 @@ contract("Exchange contract", function (accounts) {
     });
 
     describe("Exchange rates between 2 tokens", () => {
-        it("Get exchange rate", async () => {
+        it("Get exchange rate when selling token for ETH", async () => {
+            let srcAmount = 1_000_000;
+            // sell 1_000_000 tokenA for 5_000 ETH
+            // sell 1_000_000 tokenA for 1_000_000 / 200 = 5_000 Ether
+            // rate = 1 / 200 = 0.005
+
+            await reserveA.setExchangeRates(100, 200);
+
+            assert.equal(await reserveA.getExchangeRate(true, srcAmount), 100);
+
+            const rate = await exchange.getExchangeRate(tokenA.address, NATIVE_TOKEN, srcAmount);
+            assert.equal(rate, 1 * 1e18 / 200);
+        });
+
+        it("Get exchange rate when buying token with ETH", async () => {
+            let srcAmount = 10_000;
+            // buy 1_000_000 tokenA with 10_000 ETH
+            // buy 1_000_000 tokenA with 1_000_000 / 100 = 10_000 Ether
+            // rate = 100
+            
+            await reserveA.setExchangeRates(100, 200);
+
+            assert.equal(await reserveA.getExchangeRate(false, srcAmount), 200);
+
+            const rate = await exchange.getExchangeRate(NATIVE_TOKEN, tokenA.address, srcAmount);
+            assert.equal(rate, 100 * 1e18);
+        });
+
+
+        it("Get exchange rate between 2 tokens", async () => {
             let srcAmount = 1_000_000;
             // sell 1_000_000 tokenA for 2_500_000 tokenB
             // first, sell 1_000_000 tokenA for 1_000_000 / 200 = 5_000 Ether
