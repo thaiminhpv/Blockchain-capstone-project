@@ -21,6 +21,7 @@
     ]
   },
   "scripts": {
+    "ganache": "ganache-cli -p 8545 --defaultBalanceEther 100000 --wallet.seed 5555 -i 5777 --chain.chainId 5777",
     "serve": "beefy index.js --live",
     "build": "browserify index.js -o dist/bundle.js",
     "watch": "watchify index.js -o dist/bundle.js -v"
