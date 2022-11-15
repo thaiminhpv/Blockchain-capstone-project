@@ -64,7 +64,7 @@ contract Exchange {
         } else if (srcReserve != address(0) && destToken == NATIVE_TOKEN_ADDRESS) {
             // selling token for ETH
             srcRate = srcReserve.getExchangeRate(false, srcAmount);
-            return srcRate * 1e18;
+            return 1e18 / srcRate;
         } else if (srcToken == NATIVE_TOKEN_ADDRESS && destReserve != address(0)) {
             // buying token with ETH
             destRate = destReserve.getExchangeRate(true, srcAmount);
