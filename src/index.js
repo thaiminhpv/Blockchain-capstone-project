@@ -6,7 +6,7 @@ import {getWeb3Instance} from "./services/web3Service";
 const metamaskService = new MetamaskService(window.web3);
 const web3 = getWeb3Instance();
 
-const initiateDropdown = () => {
+function initiateDropdown() {
   let dropdownTokens = '';
 
   EnvConfig.TOKENS.forEach((token) => {
@@ -20,18 +20,18 @@ const initiateDropdown = () => {
     return `<option value="${token.name} (${token.symbol})">`;
   }).join('');
   $('#token-list').html(dropdownTokensInWallet);
-};
+}
 
-const initiateSelectedToken = (srcSymbol, destSymbol) => {
+function initiateSelectedToken(srcSymbol, destSymbol) {
   $('#selected-src-symbol').html(srcSymbol);
   $('#selected-dest-symbol').html(destSymbol);
   $('#rate-src-symbol').html(srcSymbol);
   $('#rate-dest-symbol').html(destSymbol);
   $('#selected-transfer-token').html(srcSymbol);
   $('#wallet-token').val(`${findTokenBySymbol(srcSymbol).name} (${srcSymbol})`);
-};
+}
 
-const updateExchangeRate = async (srcSymbol, destSymbol, srcAmount=1) => {
+async function updateExchangeRate(srcSymbol, destSymbol, srcAmount = 1) {
   const srcToken = findTokenBySymbol(srcSymbol);
   const destToken = findTokenBySymbol(destSymbol);
   const srcAmountFull = BigInt(srcAmount * 1e18);
@@ -44,9 +44,9 @@ const updateExchangeRate = async (srcSymbol, destSymbol, srcAmount=1) => {
     console.error(error);
     return 0;
   }
-};
+}
 
-const refreshTokenRate = async () => {
+async function refreshTokenRate() {
   const srcSymbol = $('#selected-src-symbol').html();
   const destSymbol = $('#selected-dest-symbol').html();
   const srcAmount = parseInt($('#swap-source-amount').val());
@@ -66,23 +66,23 @@ const refreshTokenRate = async () => {
   console.log(`Gas price: ${gas}`);
   $('#gas-amount').html(`${gas} ${EnvConfig.TOKENS[0].symbol}`);
   // FIXME: Update dest amount when srcToken is same as destToken
-};
+}
 
-const forceRefreshBalance = () => {
+function forceRefreshBalance() {
   // force update
   metamaskService.updateTokenBalances().then((tokenBalances) => {
     refreshUserBalance(tokenBalances);
   });
 }
 
-const initiateDefaultRate = (srcSymbol, destSymbol) => {
+function initiateDefaultRate(srcSymbol, destSymbol) {
   refreshTokenRate();
-};
+}
 
 const findTokenBySymbol = symbol => EnvConfig.TOKENS.find(token => token.symbol === symbol);
 const findTokenByRawName = rawName => EnvConfig.TOKENS.find((token) => `${token.name} (${token.symbol})` === rawName);
 
-const refreshUserBalance = (tokenBalances) => {
+function refreshUserBalance(tokenBalances) {
   const tokenRawName = $('#wallet-token').val();
   const token = findTokenByRawName(tokenRawName);
   if (token) {
@@ -92,14 +92,14 @@ const refreshUserBalance = (tokenBalances) => {
   }
 }
 
-const initiateProject = () => {
+function initiateProject() {
   const defaultSrcSymbol = EnvConfig.TOKENS[0].symbol;
   const defaultDestSymbol = EnvConfig.TOKENS[1].symbol;
 
   initiateDropdown();
   initiateSelectedToken(defaultSrcSymbol, defaultDestSymbol);
   initiateDefaultRate(defaultSrcSymbol, defaultDestSymbol);
-};
+}
 
 $(function () {
   initiateProject();
