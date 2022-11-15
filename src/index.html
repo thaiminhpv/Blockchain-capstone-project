@@ -13,90 +13,123 @@
 <div class="container">
   <h1 class="main-title">Decentralized Exchange</h1>
   <div class="main-content">
-    <div class="tab-container">
-      <div class="tab">
-        <div class="tab__item tab__item--active" data-content-id="swap">SWAP</div>
-        <div class="tab__item" data-content-id="transfer">TRANSFER</div>
+    <div style="position: relative; width: 0; height: 0; overflow: visible">
+      <div class="side-content">
+        <div class="side-content__title"><h1>Your Wallet Balance</h1></div>
+        <div class="input-container">
+          <label class="input-title" for="wallet-address">Wallet Address:</label>
+          <div class="input-group">
+            <input disabled class="input-item" type="text" id="wallet-address" name="wallet-address" value="0x0000000000000000000000000000000000000000">
+          </div>
+        </div>
+
+        <div class="input-container">
+          <label class="input-title" for="wallet-token">Token:</label>
+          <div class="input-group">
+            <datalist id="token-list">
+              <option value="TokenA (TKA)">
+              <option value="TokenC (TKC)">
+            </datalist>
+            <input class="input-item" type="text" id="wallet-token" name="wallet-token" autocomplete="on" list="token-list">
+          </div>
+        </div>
+
+        <div class="input-container">
+          <label class="input-title" for="wallet-balance">Left balance:</label>
+          <div class="input-group">
+            <input disabled class="input-item" type="number" id="wallet-balance" placeholder="1" value="1"/>
+          </div>
+        </div>
+
       </div>
     </div>
+    <div>
+      <div class="tab-container">
+        <div class="tab">
+          <div class="tab__item tab__item--active" data-content-id="swap">SWAP</div>
+          <div class="tab__item" data-content-id="transfer">TRANSFER</div>
+        </div>
+      </div>
 
-    <div class="swap active" id="swap">
-      <div class="input-container">
-        <label class="input-title" for="swap-source-amount">From:</label>
-        <div class="input-group">
-          <div class="dropdown">
-            <div class="dropdown__trigger">
-              <span class="selected-target" id="selected-src-symbol">Loading...</span>
-              <div class="dropdown__triangle"></div>
+      <div class="swap active" id="swap">
+        <div class="input-container">
+          <label class="input-title" for="swap-source-amount">From:</label>
+          <div class="input-group">
+            <div class="dropdown">
+              <div class="dropdown__trigger">
+                <span class="selected-target" id="selected-src-symbol">Loading...</span>
+                <div class="dropdown__triangle"></div>
+              </div>
+              <div class="dropdown__content"></div>
             </div>
-            <div class="dropdown__content"></div>
+            <input class="input-item" id="swap-source-amount" type="number" placeholder="1" value="1"/>
           </div>
-          <input class="input-item" id="swap-source-amount" type="number" placeholder="1" value="1"/>
         </div>
-      </div>
 
-      <div class="swap__icon"></div>
+        <div class="swap__icon"></div>
 
-      <div class="input-container">
-        <div class="input-title">To:</div>
-        <div class="input-group">
-          <div class="dropdown">
-            <div class="dropdown__trigger">
-              <span class="selected-target" id="selected-dest-symbol">Loading...</span>
-              <div class="dropdown__triangle"></div>
+        <div class="input-container">
+          <div class="input-title">To:</div>
+          <div class="input-group">
+            <div class="dropdown">
+              <div class="dropdown__trigger">
+                <span class="selected-target" id="selected-dest-symbol">Loading...</span>
+                <div class="dropdown__triangle"></div>
+              </div>
+              <div class="dropdown__content">
+              </div>
             </div>
-            <div class="dropdown__content">
-            </div>
+            <div class="input-placeholder" id="swap-dest-amount">0</div>
           </div>
-          <div class="input-placeholder" id="swap-dest-amount">0</div>
+          <div class="swap__rate">1 <span id="rate-src-symbol">Loading...</span> = <span
+                  id="exchange-rate">Loading...</span> <span id="rate-dest-symbol">Loading...</span></div>
         </div>
-        <div class="swap__rate">1 <span id="rate-src-symbol">Loading...</span> = <span id="exchange-rate">Loading...</span> <span id="rate-dest-symbol">Loading...</span></div>
+
+        <div class="button modal-trigger" data-modal-id="confirm-swap-modal" id="swap-button">Swap Now</div>
       </div>
 
-      <div class="button modal-trigger" data-modal-id="confirm-swap-modal" id="swap-button">Swap Now</div>
-    </div>
-
-    <div class="transfer" id="transfer">
-      <div class="input-container">
-        <label class="input-title" for="transfer-source-amount">From:</label>
-        <div class="input-group">
-          <div class="dropdown">
-            <div class="dropdown__trigger">
-              <span class="selected-target" id="selected-transfer-token">Loading...</span>
-              <div class="dropdown__triangle"></div>
+      <div class="transfer" id="transfer">
+        <div class="input-container">
+          <label class="input-title" for="transfer-source-amount">From:</label>
+          <div class="input-group">
+            <div class="dropdown">
+              <div class="dropdown__trigger">
+                <span class="selected-target" id="selected-transfer-token">Loading...</span>
+                <div class="dropdown__triangle"></div>
+              </div>
+              <div class="dropdown__content"></div>
             </div>
-            <div class="dropdown__content"></div>
+            <input class="input-item" id="transfer-source-amount" type="text"/>
           </div>
-          <input class="input-item" id="transfer-source-amount" type="text"/>
         </div>
+
+        <div class="input-container input-container--mt">
+          <label class="input-title" for="transfer-address">To Address:</label>
+          <div class="input-group">
+            <input class="input-item input-item--single" id="transfer-address" type="text"/>
+          </div>
+        </div>
+
+        <div class="button">Transfer Now</div>
       </div>
 
-      <div class="input-container input-container--mt">
-        <label class="input-title" for="transfer-address">To Address:</label>
-        <div class="input-group">
-          <input class="input-item input-item--single" id="transfer-address" type="text"/>
-        </div>
-      </div>
+      <div class="import-account">
+        <div class="import-account__title">Connect with</div>
+        <div class="import-account__container">
+          <div class="import-account__item" id="import-metamask">
+            <div class="import-account__icon metamask"></div>
+            <div class="import-account__name">METAMASK</div>
+          </div>
 
-      <div class="button">Transfer Now</div>
-    </div>
+          <div class="import-account__item import-account__item--inactive" id="import-keystore">
+            <div class="import-account__icon keystore"></div>
+            <div class="import-account__name">KEYSTORE</div>
+          </div>
 
-    <div class="import-account">
-      <div class="import-account__title">Connect with</div>
-      <div class="import-account__container">
-        <div class="import-account__item" id="import-metamask">
-          <div class="import-account__icon metamask"></div>
-          <div class="import-account__name">METAMASK</div>
-        </div>
-
-        <div class="import-account__item import-account__item--inactive" id="import-keystore">
-          <div class="import-account__icon keystore"></div>
-          <div class="import-account__name">KEYSTORE</div>
-        </div>
-
-        <div class="import-account__item import-account__item--inactive" id="import-private-key">
-          <div class="import-account__icon private-key"></div>
-          <div class="import-account__name">PRIVATE KEY</div>
+          <div class="import-account__item import-account__item--inactive" id="import-private-key">
+            <div class="import-account__icon private-key"></div>
+            <div class="import-account__name">PRIVATE KEY</div>
+          </div>
         </div>
       </div>
     </div>
