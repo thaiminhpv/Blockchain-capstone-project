@@ -2,8 +2,10 @@ import {getExchangeRate} from "./services/networkService";
 import EnvConfig from "./configs/env";
 import AppConfig from "./configs/app";
 import MetamaskService from "./services/accounts/MetamaskService";
+import {getWeb3Instance} from "./services/web3Service";
 
 const metamaskService = new MetamaskService(window.web3);
+const web3 = getWeb3Instance();
 
 const initiateDropdown = () => {
   let dropdownTokens = '';
@@ -56,7 +58,14 @@ const refreshTokenRate = async () => {
   const srcAmount = parseInt($('#swap-source-amount').val());
 
   const rate = await updateExchangeRate(srcSymbol, destSymbol, srcAmount);
-  $('#swap-dest-amount').html(rate * srcAmount);
+  const destAmount = srcAmount * rate;
+  $('#swap-dest-amount').html(destAmount);
+
+  $('.src-swap').html(`${srcAmount} ${srcSymbol}`);
+  $('.dest-swap').html(`${destAmount} ${destSymbol}`);
+  const gas = web3.utils.fromWei(await getWeb3Instance().eth.getGasPrice(), 'ether');
+  console.log(`Gas price: ${gas}`);
+  $('#gas-amount').html(`${gas} ${EnvConfig.TOKENS[0].symbol}`);
   // FIXME: Update dest amount when srcToken is same as destToken
 };
 
@@ -154,6 +163,17 @@ $(function () {
   $('#swap-button').on('click', function () {
     const modalId = $(this).data('modal-id');
     $(`#${modalId}`).addClass('modal--active');
+    refreshTokenRate();
+  });
+
+  $('.modal__cancel').on('click', function () {
+    $(this).parents('.modal').removeClass('modal--active');
+  });
+
+  $('.modal__confirm').on('click', function () {
+    $(this).parents('.modal').removeClass('modal--active');
+    console.log('Swap Now');
+    alert('Swap Now');
   });
 
   // Tab Processing
