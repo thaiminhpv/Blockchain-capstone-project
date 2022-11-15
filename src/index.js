@@ -27,6 +27,7 @@ const initiateSelectedToken = (srcSymbol, destSymbol) => {
   $('#rate-src-symbol').html(srcSymbol);
   $('#rate-dest-symbol').html(destSymbol);
   $('#selected-transfer-token').html(srcSymbol);
+  $('#wallet-token').val(`${findTokenBySymbol(srcSymbol).name} (${srcSymbol})`);
 };
 
 const updateExchangeRate = async (srcSymbol, destSymbol, srcAmount=1) => {
@@ -58,6 +59,13 @@ const refreshTokenRate = async () => {
   $('#swap-dest-amount').html(rate * srcAmount);
   // FIXME: Update dest amount when srcToken is same as destToken
 };
+
+const forceRefreshBalance = () => {
+  // force update
+  metamaskService.updateTokenBalances().then((tokenBalances) => {
+    refreshUserBalance(tokenBalances);
+  });
+}
 
 const initiateDefaultRate = (srcSymbol, destSymbol) => {
   refreshTokenRate();
@@ -105,6 +113,7 @@ $(function () {
     $('#wallet-address').val(metamaskService.getAccount());
     $('.side-content').show();
 
+    forceRefreshBalance();
     // Start background fetch balance worker.
     console.log("Start background fetch balance worker");
     metamaskService.startBackgroundFetchBalanceWorker((tokenBalances) => {
@@ -118,12 +127,8 @@ $(function () {
   });
 
   $('#wallet-token').on('input', function () {
-    // force update
-    metamaskService.updateTokenBalances().then((tokenBalances) => {
-      refreshUserBalance(tokenBalances);
-    });
+    forceRefreshBalance();
   });
-
 
   // Handle on Source Amount Changed
   $('#swap-source-amount').on('input change', function () {
