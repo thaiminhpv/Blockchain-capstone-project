@@ -57,7 +57,9 @@ contract Exchange {
         uint256 srcRate;
         uint256 destRate;
 
-        if (srcReserve != address(0) && destReserve != address(0)) {
+        if (srcToken == destToken) {
+            return 1e18;
+        } else if (srcReserve != address(0) && destReserve != address(0)) {
             srcRate = srcReserve.getExchangeRate(false, srcAmount);
             destRate = destReserve.getExchangeRate(true, srcAmount);
             return destRate * 1e18 / srcRate;

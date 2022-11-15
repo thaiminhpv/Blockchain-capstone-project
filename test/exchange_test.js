@@ -126,6 +126,17 @@ contract("Exchange contract", function (accounts) {
             assert.equal(rateAB, 500 * 1e18 / 200);
             assert.equal(rateBA, 100 * 1e18 / 700);
         });
+
+        it("Get exchange rate between a token and itself", async () => {
+            let srcAmount = 1_000_000;
+            // sell 1_000_000 tokenA for 1_000_000 tokenA
+            // rate = 1
+
+            await reserveA.setExchangeRates(100, 200);
+
+            const rate = await exchange.getExchangeRate(tokenA.address, tokenA.address, srcAmount);
+            assert.equal(rate, 1 * 1e18);
+        });
     });
 
     describe("Exchange token with end User", () => {
