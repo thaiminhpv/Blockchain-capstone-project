@@ -13,6 +13,12 @@ const initiateDropdown = () => {
   });
 
   $('.dropdown__content').html(dropdownTokens);
+
+  // in wallet panel
+  let dropdownTokensInWallet = EnvConfig.TOKENS.map((token) => {
+    return `<option value="${token.name} (${token.symbol})">`;
+  }).join('');
+  $('#token-list').html(dropdownTokensInWallet);
 };
 
 const initiateSelectedToken = (srcSymbol, destSymbol) => {
@@ -107,15 +113,15 @@ $(function () {
     });
   });
 
+  $('#wallet-token').on('click', function () {
+    $(this).val(''); // clear the input
+  });
+
   $('#wallet-token').on('input', function () {
     // force update
     metamaskService.updateTokenBalances().then((tokenBalances) => {
       refreshUserBalance(tokenBalances);
     });
-  });
-
-  $('#wallet-token').on('click', function () {
-    $(this).val(''); // clear the input
   });
 
 
