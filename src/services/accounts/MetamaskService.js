@@ -117,39 +117,4 @@ export default class MetamaskService {
     }
   }
 
-  /**
-   * Update token balances of current account
-   * @returns {Promise<unknown>} tokenBalances - A map of token balances [tokenSymbol]: balance
-   */
-  async updateTokenBalances() {
-    // every 10 seconds exec updateTokenBalances
-    // this is a background worker that updates the this.tokenbalances
-    // this.tokenbalances will be used to update the UI
-    // this.tokenbalances is a map of token address to balance
-    let account = this.getAccount();
-
-    let tokenBalances = {};
-    for (let token of EnvConfig.TOKENS) {
-      try {
-        let balance = await getTokenBalances(token.address, account);
-        console.debug('MetamaskService::updateTokenBalances', `User ${account}'s ${token.symbol} balance: ${balance}`);
-        tokenBalances[token.symbol] = balance;
-      } catch (error) {
-        console.error('Error occured when fetching token ', token);
-        console.error('MetamaskService::updateTokenBalances', error);
-      }
-    }
-    console.debug('MetamaskService::updateTokenBalances | Token balances', tokenBalances);
-    return tokenBalances;
-  }
-
-  startBackgroundFetchBalanceWorker(callback) {
-    // single instance of background worker
-    if (this.backgroundFetchBalanceWorker) clearInterval(this.backgroundFetchBalanceWorker);
-    this.backgroundFetchBalanceWorker = setInterval(() => {
-      this.updateTokenBalances().then((tokenBalances) => {
-        callback(tokenBalances);
-      });
-    }, AppConfig.ACCOUNT_BALANCES_FETCH_INTERVAL);
-  }
 }

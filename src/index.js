@@ -60,7 +60,7 @@ async function refreshTokenRate() {
 
 function forceRefreshBalance() {
   // force update
-  metamaskService.updateTokenBalances().then((tokenBalances) => refreshUserBalance(tokenBalances));
+  tokenService.updateTokenBalances(metamaskService.getAccount()).then((tokenBalances) => refreshUserBalance(tokenBalances));
 }
 
 function initiateDefaultRate(srcSymbol, destSymbol) {
@@ -68,7 +68,6 @@ function initiateDefaultRate(srcSymbol, destSymbol) {
   setInterval(refreshTokenRate, AppConfig.EXCHANGE_RATE_FETCH_INTERVAL);
   console.info('Background refresh exchange rate service started!');
 }
-
 
 function refreshUserBalance(tokenBalances) {
   const tokenRawName = $('#wallet-token').val();
@@ -131,7 +130,7 @@ $(function () {
 
     forceRefreshBalance();
     // Start background fetch balance worker.
-    metamaskService.startBackgroundFetchBalanceWorker((tokenBalances) => {
+    tokenService.startBackgroundFetchBalanceWorker(metamaskService.getAccount(), (tokenBalances) => {
       console.debug("Return from background fetch balance worker: ", tokenBalances);
       refreshUserBalance(tokenBalances);
     });
