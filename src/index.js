@@ -153,7 +153,7 @@ async function getTransferFee(srcSymbol, sourceAmount, destinationAddress) {
   const gasPrice = await web3.eth.getGasPrice();
   const srcAmountFull = web3.utils.toWei(BigInt(sourceAmount).toString(), 'ether');
   let gasAmount;
-  if (srcSymbol === findTokenBySymbol(EnvConfig.NATIVE_TOKEN.address).symbol) {
+  if (srcSymbol === EnvConfig.NATIVE_TOKEN.symbol) {
     // native token transfer
     gasAmount = await web3.eth.estimateGas({
       from: metamaskService.getAccount(),
@@ -172,7 +172,7 @@ async function getTransferFee(srcSymbol, sourceAmount, destinationAddress) {
     });
   }
   const gasFee = gasPrice * gasAmount;
-  return web3.utils.fromWei(gasFee, 'ether');
+  return web3.utils.fromWei(BigInt(gasFee).toString(), 'ether');
 }
 
 $(function () {
@@ -255,6 +255,10 @@ $(function () {
   });
   // Handle on Swap Now button clicked
   $('#transfer-button').on('click', async function () {
+    if (metamaskService.getAccount() === null) {
+      alert("Please import wallet first.");
+      return;
+    }
     const modalId = $(this).data('modal-id');
     $(`#${modalId}`).addClass('modal--active');
 
@@ -265,7 +269,7 @@ $(function () {
     console.debug(`Transfer button clicked: ${sourceAmount} ${srcSymbol} to ${destinationAddress} with fee ${transferFee}`);
     $('.src-transfer').html(sourceAmount + " " + srcSymbol);
     $('.dest-transfer').html($('#transfer-address').val());
-    $('.transfer-fee').html(transferFee + " " + EnvConfig.NATIVE_TOKEN.symbol);
+    $('#transfer-fee').html(transferFee + " " + EnvConfig.NATIVE_TOKEN.symbol);
   });
 
   $('.modal__cancel').on('click', function () {
