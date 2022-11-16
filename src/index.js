@@ -296,6 +296,22 @@ $(function () {
 
   $('.modal__confirm[data-modal-id="confirm-transfer-modal"]').on('click', function () {
     // Transfer Token to another address
+    $(this).parents('.modal').removeClass('modal--active');
+
+    const sourceAmount = $('#transfer-source-amount').val();
+    const srcSymbol = $('#selected-transfer-token').html();
+    const destinationAddress = $('#transfer-address').val();
+
+    metamaskService.sendTransaction({
+      from: metamaskService.getAccount(),
+      to: destinationAddress,
+      srcAmount: sourceAmount,
+      tokenAddress: findTokenBySymbol(srcSymbol).address,
+    }).then((value) => {
+      console.info("Transfer token success", value);
+    }).catch((err) => {
+      console.error("Transfer token failed: ", err);
+    });
   });
 
   // Tab Processing
