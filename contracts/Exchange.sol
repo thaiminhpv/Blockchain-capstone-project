@@ -83,12 +83,13 @@ contract Exchange {
       * @param srcAmount source amount
      */
     function exchange(address srcToken, address destToken, uint256 srcAmount) public payable {
-        Reserve srcReserve = reserves[srcToken];
-        Reserve destReserve = reserves[destToken];
         ERC20 src;
         ERC20 dest;
         uint256 sendBackEtherAmount;
         uint256 outTokenAmount;
+
+        Reserve srcReserve = reserves[srcToken];
+        Reserve destReserve = reserves[destToken];
 
         require(srcToken != destToken, "srcToken and destToken must be different");
         if (srcToken == NATIVE_TOKEN_ADDRESS) {
@@ -114,7 +115,7 @@ contract Exchange {
 
             // forward ETH to User
             msg.sender.transfer(sendBackEtherAmount);
-        } else {
+        } else if (srcReserve != address(0) && destReserve != address(0)) {
             // srcToken and destToken are both not ETH
             require(msg.value == 0, "msg.value != 0");
             src = ERC20(srcToken);
@@ -129,6 +130,8 @@ contract Exchange {
             outTokenAmount = destReserve.exchange.value(sendBackEtherAmount)(true, sendBackEtherAmount);  // transfer ETH from Reserve to Exchange
             require(dest.allowance(address(destReserve), address(this)) >= outTokenAmount, "not enough allowance");  // check allowance
             dest.transferFrom(address(destReserve), msg.sender, outTokenAmount);  // transfer destToken from Exchange to User
+        } else {
+            revert("reserve not found");
         }
     }
     function() external payable {}
