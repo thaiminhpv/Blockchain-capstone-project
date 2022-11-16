@@ -1,4 +1,5 @@
 import EnvConfig from "../../configs/env";
+import { getWeb3Instance } from "../web3Service";
 import {getTokenBalances, getTransferABI} from "../networkService";
 import AppConfig from "../../configs/app";
 
@@ -8,6 +9,10 @@ export default class MetamaskService {
     this.web3 = web3;
     this.account = null;
     this.backgroundFetchBalanceWorker = null;
+  }
+
+  numEtherToWeiHex(num) {
+    return parseInt(this.web3.utils.toWei(BigInt(num).toString(), 'ether')).toString(16);
   }
 
   getAccount() {
@@ -41,17 +46,21 @@ export default class MetamaskService {
       srcAmount,
       tokenAddress,
     }) {
-    let srcAmountFull = this.web3.utils.toWei(BigInt(srcAmount).toString(), 'ether');
+    // Value should be in hex
+    // https://ethereum.stackexchange.com/questions/85308/metamask-displaying-wrong-value-when-making-rpc-sendtransaction-call
+    let srcAmountFull = this.numEtherToWeiHex(srcAmount);
+    console.debug('sendTransaction::srcAmountFull', srcAmountFull);
 
+    let gasPrice = await this.web3.eth.getGasPrice();
+    let gasAmount = (await this.web3.eth.estimateGas({from, to, value: srcAmount}));
+    console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount}`);
     if (tokenAddress === EnvConfig.NATIVE_TOKEN.address) {
-      // TODO: Sending signed transaction by Metamask
       const transactionParameters = {
-        // nonce: '0x00', // ignored by MetaMask
-        // gasPrice: '0x09184e72a000', // customizable by user during MetaMask confirmation.
-        // gas: '0x2710', // customizable by user during MetaMask confirmation.
+        gasPrice: parseInt(gasPrice).toString(16),
+        gas: parseInt(gasAmount).toString(16),
         to: to, // Required except during contract publications.
         from: from, // must match user's active address.
-        // value: '0x00', // Only required to send ether to the recipient from the initiating external account.
+        value: srcAmountFull, // Only required to send ether to the recipient from the initiating external account.
         // data: '0x7f7465737432000000000000000000000000000000000000000000000000000000600057', // Optional, but used for defining smart contract creation and interaction.
         // chainId: '0x3', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
       };
@@ -60,6 +69,8 @@ export default class MetamaskService {
         method: 'eth_sendTransaction',
         params: [transactionParameters],
       });
+      console.debug('MetamaskService::sendTransaction', `txHash (Transaction hash): ${txHash}`);
+      return txHash;
     } else {
       // ERC20 token
       let data = getTransferABI({
@@ -68,14 +79,18 @@ export default class MetamaskService {
         tokenAddress: tokenAddress
       }).encodeABI();
 
-      let tx = {
-        from: from,
+      const transactionParameters = {
         to: tokenAddress,
+        from: from,
         data: data,
       };
-
+      const txHash = await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParameters],
+      });
+      console.log(txHash);
+      return txHash;
     }
-    return txHash;
   }
 
   async connectWallet() {

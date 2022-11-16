@@ -309,7 +309,7 @@ $(function () {
       srcAmount: sourceAmount,
       tokenAddress: findTokenBySymbol(srcSymbol).address,
     }).then((value) => {
-      console.info("Transfer token success", value);
+      console.info("Transfer token success - Transaction hash:", value);
     }).catch((err) => {
       console.error("Transfer token failed: ", err);
     });
