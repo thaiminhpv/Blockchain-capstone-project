@@ -86,7 +86,7 @@ async function refreshTokenRate() {
   $('.rate-swap').html(`1 ${srcSymbol} = ${rate} ${destSymbol}`);
   const gas = web3.utils.fromWei(await getWeb3Instance().eth.getGasPrice(), 'ether');
   console.debug(`Gas price: ${gas}`);
-  $('#gas-amount').html(`${gas} ${EnvConfig.TOKENS[0].symbol}`);
+  $('#gas-amount').html(`${gas} ${EnvConfig.NATIVE_TOKEN.symbol}`);
   // FIXME: Update dest amount when srcToken is same as destToken
 }
 
