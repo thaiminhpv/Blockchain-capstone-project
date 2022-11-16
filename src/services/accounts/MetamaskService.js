@@ -46,15 +46,17 @@ export default class MetamaskService {
       srcAmount,
       tokenAddress,
     }) {
-    // Value should be in hex
-    // https://ethereum.stackexchange.com/questions/85308/metamask-displaying-wrong-value-when-making-rpc-sendtransaction-call
-    let srcAmountFull = this.numEtherToWeiHex(srcAmount);
-    console.debug('sendTransaction::srcAmountFull', srcAmountFull);
 
     let gasPrice = await this.web3.eth.getGasPrice();
-    let gasAmount = (await this.web3.eth.estimateGas({from, to, value: srcAmount}));
-    console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount}`);
     if (tokenAddress === EnvConfig.NATIVE_TOKEN.address) {
+      // Value should be in hex
+      // https://ethereum.stackexchange.com/questions/85308/metamask-displaying-wrong-value-when-making-rpc-sendtransaction-call
+      let srcAmountFull = this.numEtherToWeiHex(srcAmount);
+      console.debug('sendTransaction::srcAmountFull', srcAmountFull);
+
+      let gasAmount = await this.web3.eth.estimateGas({from, to, value: srcAmount});
+      console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount}`);
+
       const transactionParameters = {
         gasPrice: parseInt(gasPrice).toString(16),
         gas: parseInt(gasAmount).toString(16),
@@ -73,22 +75,27 @@ export default class MetamaskService {
       return txHash;
     } else {
       // ERC20 token
-      let data = getTransferABI({
-        amount: srcAmountFull,
+      let transferABI = getTransferABI({
+        amount: this.web3.utils.toWei(srcAmount, 'ether'),
         toAddress: to,
         tokenAddress: tokenAddress
-      }).encodeABI();
+      })
+      let gasAmount = await transferABI.estimateGas({from: from});
+      let data = transferABI.encodeABI();
 
+      console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount}`);
       const transactionParameters = {
         to: tokenAddress,
         from: from,
         data: data,
+        gasPrice: parseInt(gasPrice).toString(16),
+        gas: parseInt(gasAmount).toString(16),
       };
       const txHash = await ethereum.request({
         method: 'eth_sendTransaction',
         params: [transactionParameters],
       });
-      console.log(txHash);
+      console.debug('MetamaskService::sendTransaction', `txHash (Transaction hash): ${txHash}`);
       return txHash;
     }
   }
