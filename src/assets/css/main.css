@@ -506,4 +506,13 @@ input {
 .transfer.active {
   display: block;
 }
+
+#transfer-address-error-message {
+  color: #ff0000;
+  font-size: 18px;
+  font-weight: 500;
+  margin-top: 10px;
+  display: none;
+  position: absolute;
+}
 /*========= End Transfer =========*/
