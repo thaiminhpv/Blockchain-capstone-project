@@ -1,20 +1,31 @@
 import {getExchangeContract, getTokenContract, getWeb3Instance} from "./web3Service";
 import EnvConfig from "../configs/env";
 
-export function getSwapABI(data) {
-  /*TODO: Get Swap ABI*/
+export function getSwapABI({
+    srcTokenAddress,
+    destTokenAddress,
+    srcAmount
+  }) {
+  return getExchangeContract().methods.exchange(srcTokenAddress, destTokenAddress, srcAmount);
 }
 
-export function getTransferABI(data) {
-  /*TODO: Get Transfer ABI*/
+/**
+ * Get ERC20 token Transfer ABI
+ * @param amount
+ * @param toAddress
+ * @param tokenAddress
+ * @returns {*}
+ */
+export function getTransferABI({amount, toAddress, tokenAddress}) {
+  return getTokenContract(tokenAddress).methods.transfer(toAddress, amount)
 }
 
 export function getApproveABI(srcTokenAddress, amount) {
-  /*TODO: Get Approve ABI*/
+  return getTokenContract(srcTokenAddress).methods.approve(EnvConfig.EXCHANGE_CONTRACT_ADDRESS, amount)
 }
 
-export function getAllowance(srcTokenAddress, address, spender) {
-  /*TODO: Get current allowance for a token in user wallet*/
+export async function getAllowance(srcTokenAddress, address, spender) {
+  return await getTokenContract(srcTokenAddress).methods.allowance(address, spender).call();
 }
 
 /* Get Exchange Rate from Smart Contract */
@@ -31,7 +42,7 @@ export function getExchangeRate(srcTokenAddress, destTokenAddress, srcAmount) {
 }
 
 export async function getTokenBalances(tokenAddress, accountAddress) {
-  if (tokenAddress === EnvConfig.NATIVE_TOKEN_ADDRESS) {
+  if (tokenAddress === EnvConfig.NATIVE_TOKEN.address) {
     const web3 = getWeb3Instance();
     return await web3.eth.getBalance(accountAddress);
   } else {
