@@ -243,8 +243,13 @@ $(function () {
   $('.swap__icon').on('click', function () {
     const srcSymbol = $('#selected-src-symbol').html();
     const destSymbol = $('#selected-dest-symbol').html();
-    initiateSelectedToken(destSymbol, srcSymbol);
-    initiateDefaultRate(destSymbol, srcSymbol);
+
+    $('#selected-src-symbol').html(destSymbol);
+    $('#selected-dest-symbol').html(srcSymbol);
+    $('#rate-src-symbol').html(destSymbol);
+    $('#rate-dest-symbol').html(srcSymbol);
+
+    refreshTokenRate();
   });
 
 
