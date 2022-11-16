@@ -104,13 +104,28 @@ function initiateProject() {
   initiateDefaultRate(defaultSrcSymbol, defaultDestSymbol);
 }
 
-function validateSourceAmount() {
+function validateSwapSourceAmount() {
   const sourceAmount = $('#swap-source-amount').val();
   // filter everything except numbers and dot
-  console.debug("Source Amount before: ", sourceAmount);
+  console.debug("Swap Source Amount before: ", sourceAmount);
   const filteredSourceAmount = sourceAmount.replace(/[^0-9.]/g, '');
-  console.debug(`Source Amount after: ${filteredSourceAmount}`);
+  console.debug(`Swap Source Amount after: ${filteredSourceAmount}`);
   $('#swap-source-amount').val(filteredSourceAmount);
+}
+
+function validateTransferSourceAmount() {
+  const sourceAmount = $('#transfer-source-amount').val();
+  // filter everything except numbers and dot
+  console.debug("Transfer Source Amount before: ", sourceAmount);
+  const filteredSourceAmount = sourceAmount.replace(/[^0-9.]/g, '');
+  console.debug(`Transfer Source Amount after: ${filteredSourceAmount}`);
+  $('#transfer-source-amount').val(filteredSourceAmount);
+}
+
+function validateTransferDestinationAddress() {
+  const destinationAddress = $('#transfer-address').val();
+  console.debug(`Typed Transfer Destination Address: ${destinationAddress} -- ${web3.utils.isAddress(destinationAddress)}`);
+  return web3.utils.isAddress(destinationAddress);
 }
 
 $(function () {
@@ -153,7 +168,21 @@ $(function () {
   // Handle on Source Amount Changed
   $('#swap-source-amount').on('input change', function () {
     refreshTokenRate();
-    validateSourceAmount();
+    validateSwapSourceAmount();
+  });
+
+  $('#transfer-source-amount').on('input change', function () {
+    validateTransferSourceAmount();
+  });
+
+  $('#transfer-address').on('input change', function () {
+    if (validateTransferDestinationAddress()) {
+      $('#transfer-button').prop('disabled', false);
+      $('#transfer-address-error-message').hide();
+    } else {
+      $('#transfer-button').prop('disabled', true);
+      $('#transfer-address-error-message').show();
+    }
   });
 
   // Handle on click token in Token Dropdown List
