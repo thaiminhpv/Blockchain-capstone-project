@@ -47,6 +47,27 @@ async function updateExchangeRate(srcSymbol, destSymbol, srcAmount = 1) {
   }
 }
 
+async function swapToken(srcSymbol, destSymbol, srcAmount) {
+  const srcToken = findTokenBySymbol(srcSymbol);
+  const destToken = findTokenBySymbol(destSymbol);
+  const srcAmountFull = web3.utils.toWei(BigInt(srcAmount).toString(), 'ether');
+
+  console.log(`Swapping ${srcAmountFull} ${srcSymbol} to ${destSymbol} via account ${metamaskService.getAccount()}`);
+  // let gas = web3.utils.fromWei(await web3.eth.getGasPrice(), 'ether');
+  let gas = await web3.eth.getGasPrice();
+  console.log(`Gas price: ${gas}`);
+  // let value = srcToken.address === EnvConfig.NATIVE_TOKEN_ADDRESS ? srcAmountFull * gas : 0;
+  return getSwapABI({
+    srcTokenAddress: srcToken.address,
+    destTokenAddress: destToken.address,
+    srcAmount: srcAmountFull,
+  }).send({
+    from: metamaskService.getAccount(),
+    value: gas * 1000,
+    // value: srcAmountFull
+  })
+}
+
 async function refreshTokenRate() {
   const srcSymbol = $('#selected-src-symbol').html();
   const destSymbol = $('#selected-dest-symbol').html();
@@ -213,8 +234,20 @@ $(function () {
 
   $('.modal__confirm').on('click', function () {
     $(this).parents('.modal').removeClass('modal--active');
-    console.log('Swap Now');
-    alert('Swap Now');
+    const srcSymbol = $('#selected-src-symbol').html();
+    const destSymbol = $('#selected-dest-symbol').html();
+    const srcAmount = parseInt($('#swap-source-amount').val());
+
+    if (metamaskService.getAccount() === null) {
+      alert("Please import wallet first.");
+      return;
+    }
+
+    swapToken(srcSymbol, destSymbol, srcAmount).then((value) => {
+      console.info("Swap token success", value);
+    }).catch((err) => {
+      console.error("Swap token failed: ", err);
+    });
   });
 
   // Tab Processing
