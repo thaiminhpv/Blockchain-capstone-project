@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "browserify": "^16.5.0",
+    "ethereumjs-tx": "^2.1.2",
     "watchify": "^3.11.1",
     "web3": "^1.8.0"
   },
