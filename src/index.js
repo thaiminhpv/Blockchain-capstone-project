@@ -51,21 +51,46 @@ async function swapToken(srcSymbol, destSymbol, srcAmount) {
   const srcToken = findTokenBySymbol(srcSymbol);
   const destToken = findTokenBySymbol(destSymbol);
   const srcAmountFull = web3.utils.toWei(BigInt(srcAmount).toString(), 'ether');
+  const from = metamaskService.getAccount()
 
-  console.log(`Swapping ${srcAmountFull} ${srcSymbol} to ${destSymbol} via account ${metamaskService.getAccount()}`);
-  // let gas = web3.utils.fromWei(await web3.eth.getGasPrice(), 'ether');
-  let gas = await web3.eth.getGasPrice();
-  console.log(`Gas price: ${gas}`);
-  // let value = srcToken.address === EnvConfig.NATIVE_TOKEN_ADDRESS ? srcAmountFull * gas : 0;
-  return getSwapABI({
+  console.log(`Swapping ${srcAmountFull} ${srcSymbol} to ${destSymbol} via account ${from}`);
+  let swapABI = getSwapABI({
     srcTokenAddress: srcToken.address,
     destTokenAddress: destToken.address,
     srcAmount: srcAmountFull,
-  }).send({
-    from: metamaskService.getAccount(),
-    value: gas * 1000,
-    // value: srcAmountFull
   })
+  let data = swapABI.encodeABI();
+  let gasPrice = await web3.eth.getGasPrice();
+  let transactionParameters, gasAmount;
+
+  if (srcToken.address === EnvConfig.NATIVE_TOKEN.address) {
+    gasAmount = await swapABI.estimateGas({from: from, value: srcAmountFull});
+    transactionParameters = {
+      to: EnvConfig.EXCHANGE_CONTRACT_ADDRESS,
+      from: from,
+      data: data,
+      gasPrice: parseInt(gasPrice).toString(16),
+      gas: parseInt(gasAmount).toString(16),
+      value: parseInt(srcAmountFull).toString(16),
+    };
+  } else {
+    gasAmount = await swapABI.estimateGas({from: from});
+    transactionParameters = {
+      to: EnvConfig.EXCHANGE_CONTRACT_ADDRESS,
+      from: from,
+      data: data,
+      gasPrice: parseInt(gasPrice).toString(16),
+      gas: parseInt(gasAmount).toString(16),
+    };
+  }
+  console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount}`);
+  console.debug('MetamaskService::sendTransaction', transactionParameters);
+  const txHash = await ethereum.request({
+    method: 'eth_sendTransaction',
+    params: [transactionParameters],
+  });
+  console.debug('MetamaskService::sendTransaction', `txHash (Transaction hash): ${txHash}`);
+  return txHash;
 }
 
 async function refreshTokenRate() {
