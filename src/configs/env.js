@@ -1,6 +1,6 @@
 import exchange_abi from '../services/abi/Exchange.json';
 
-const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+const NATIVE_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
 const EnvConfig = {
   // RPC_ENDPOINT: 'https://rpc.testnet.tomochain.com',

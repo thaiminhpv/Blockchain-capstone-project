@@ -103,6 +103,6 @@ export default class MetamaskService {
       this.updateTokenBalances().then((tokenBalances) => {
         callback(tokenBalances);
       });
-    }, AppConfig.accountBalancesFetchInterval);
+    }, AppConfig.ACCOUNT_BALANCES_FETCH_INTERVAL);
   }
 }

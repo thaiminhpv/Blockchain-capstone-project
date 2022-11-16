@@ -1,7 +1,8 @@
-import {getExchangeRate} from "./services/networkService";
+import {getExchangeRate, getSwapABI} from "./services/networkService";
 import EnvConfig from "./configs/env";
 import MetamaskService from "./services/accounts/MetamaskService";
 import {getWeb3Instance} from "./services/web3Service";
+import AppConfig from "./configs/app";
 
 const metamaskService = new MetamaskService(window.web3);
 const web3 = getWeb3Instance();
@@ -77,6 +78,8 @@ function forceRefreshBalance() {
 
 function initiateDefaultRate(srcSymbol, destSymbol) {
   refreshTokenRate();
+  setInterval(refreshTokenRate, AppConfig.EXCHANGE_RATE_FETCH_INTERVAL);
+  console.info('Background refresh exchange rate service started!');
 }
 
 const findTokenBySymbol = symbol => EnvConfig.TOKENS.find(token => token.symbol === symbol);
@@ -132,11 +135,11 @@ $(function () {
 
     forceRefreshBalance();
     // Start background fetch balance worker.
-    console.log("Start background fetch balance worker");
     metamaskService.startBackgroundFetchBalanceWorker((tokenBalances) => {
-      console.log("Background fetch balance worker: ", tokenBalances);
+      console.debug("Return from background fetch balance worker: ", tokenBalances);
       refreshUserBalance(tokenBalances);
     });
+    console.info("Background fetch balance worker started!");
   });
 
   $('#wallet-token').on('click', function () {

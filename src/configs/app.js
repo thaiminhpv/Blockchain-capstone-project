@@ -1,7 +1,8 @@
-console.log("App config loaded");
+console.debug("App config loaded");
 
 const AppConfig = {
-  accountBalancesFetchInterval: 10000,
+  ACCOUNT_BALANCES_FETCH_INTERVAL: 10000,
+  EXCHANGE_RATE_FETCH_INTERVAL: 10000,
 };
 
 export default AppConfig;
