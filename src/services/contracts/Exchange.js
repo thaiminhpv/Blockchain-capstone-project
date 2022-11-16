@@ -1,4 +1,4 @@
-import {getExchangeRate, getSwapABI, getTransferABI} from "../networkService";
+import {getExchangeRate, getSwapABI, getTransferABI, getApproveABI, getAllowance} from "../networkService";
 import EnvConfig from "../../configs/env";
 
 export default class Exchange {
@@ -59,6 +59,7 @@ export default class Exchange {
   }
 
   async swapToken(srcSymbol, destSymbol, srcAmount) {
+    debugger
     const srcToken = this.tokenService.findTokenBySymbol(srcSymbol);
     const destToken = this.tokenService.findTokenBySymbol(destSymbol);
     const srcAmountFull = this.web3.utils.toWei(BigInt(srcAmount).toString(), 'ether');
@@ -85,7 +86,25 @@ export default class Exchange {
         value: parseInt(srcAmountFull).toString(16),
       };
     } else {
+      // ERC20 token
+      // TODO: approve first then swap
+      const approveABI = getApproveABI(srcToken.address, srcAmountFull);
+      let gasAmount = await approveABI.estimateGas({from: from});
+      console.debug(`Approve gas amount: ${gasAmount}`);
+      const approveTxHash = await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [{
+          from: from,
+          to: srcToken.address,
+          data: approveABI.encodeABI(),
+          gasPrice: parseInt(gasPrice).toString(16),
+          gas: parseInt(gasAmount).toString(16),
+        }]
+      });
+      const allowance = await getAllowance(srcToken.address, from, EnvConfig.EXCHANGE_CONTRACT_ADDRESS);
+      console.debug(`Allowance: ${allowance}`);
       gasAmount = await swapABI.estimateGas({from: from});
+      console.debug(`Swap gas amount: ${gasAmount}`);
       transactionParameters = {
         to: EnvConfig.EXCHANGE_CONTRACT_ADDRESS,
         from: from,
@@ -94,14 +113,13 @@ export default class Exchange {
         gas: parseInt(gasAmount).toString(16),
       };
     }
-    console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount}`);
-    console.debug('MetamaskService::sendTransaction', transactionParameters);
+    console.debug('Exchange::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount}`);
+    console.debug('Exchange::sendTransaction', transactionParameters);
     const txHash = await ethereum.request({
       method: 'eth_sendTransaction',
       params: [transactionParameters],
     });
-    console.debug('MetamaskService::sendTransaction', `txHash (Transaction hash): ${txHash}`);
+    console.debug('Exchange::sendTransaction', `txHash (Transaction hash): ${txHash}`);
     return txHash;
   }
-
 }
