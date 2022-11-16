@@ -4,8 +4,8 @@ import MetamaskService from "./services/accounts/MetamaskService";
 import {getWeb3Instance} from "./services/web3Service";
 import AppConfig from "./configs/app";
 
-const metamaskService = new MetamaskService(window.web3);
 const web3 = getWeb3Instance();
+const metamaskService = new MetamaskService(web3);
 
 function initiateDropdown() {
   let dropdownTokens = '';
