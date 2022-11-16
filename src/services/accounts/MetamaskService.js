@@ -1,5 +1,4 @@
 import EnvConfig from "../../configs/env";
-import { getWeb3Instance } from "../web3Service";
 import {getTokenBalances, getTransferABI} from "../networkService";
 import AppConfig from "../../configs/app";
 

@@ -3,9 +3,13 @@ import EnvConfig from "./configs/env";
 import MetamaskService from "./services/accounts/MetamaskService";
 import {getWeb3Instance} from "./services/web3Service";
 import AppConfig from "./configs/app";
+import Token from "./services/contracts/Token";
+import Exchange from "./services/contracts/Exchange";
 
 const web3 = getWeb3Instance();
 const metamaskService = new MetamaskService(web3);
+const tokenService = new Token(web3);
+const exchangeService = new Exchange(web3, tokenService, metamaskService);
 
 function initiateDropdown() {
   let dropdownTokens = '';
@@ -29,68 +33,7 @@ function initiateSelectedToken(srcSymbol, destSymbol) {
   $('#rate-src-symbol').html(srcSymbol);
   $('#rate-dest-symbol').html(destSymbol);
   $('#selected-transfer-token').html(srcSymbol);
-  $('#wallet-token').val(`${findTokenBySymbol(srcSymbol).name} (${srcSymbol})`);
-}
-
-async function updateExchangeRate(srcSymbol, destSymbol, srcAmount = 1) {
-  const srcToken = findTokenBySymbol(srcSymbol);
-  const destToken = findTokenBySymbol(destSymbol);
-  const srcAmountFull = BigInt(srcAmount * 1e18);
-
-  try {
-    const exchangeRate = await getExchangeRate(srcToken.address, destToken.address, srcAmountFull);
-    console.debug(`Exchange rate of ${srcSymbol}->${destSymbol}: ${exchangeRate}`);
-    return web3.utils.fromWei(exchangeRate, 'ether');
-  } catch (error) {
-    console.error(error);
-    return 0;
-  }
-}
-
-async function swapToken(srcSymbol, destSymbol, srcAmount) {
-  const srcToken = findTokenBySymbol(srcSymbol);
-  const destToken = findTokenBySymbol(destSymbol);
-  const srcAmountFull = web3.utils.toWei(BigInt(srcAmount).toString(), 'ether');
-  const from = metamaskService.getAccount()
-
-  console.log(`Swapping ${srcAmountFull} ${srcSymbol} to ${destSymbol} via account ${from}`);
-  let swapABI = getSwapABI({
-    srcTokenAddress: srcToken.address,
-    destTokenAddress: destToken.address,
-    srcAmount: srcAmountFull,
-  })
-  let data = swapABI.encodeABI();
-  let gasPrice = await web3.eth.getGasPrice();
-  let transactionParameters, gasAmount;
-
-  if (srcToken.address === EnvConfig.NATIVE_TOKEN.address) {
-    gasAmount = await swapABI.estimateGas({from: from, value: srcAmountFull});
-    transactionParameters = {
-      to: EnvConfig.EXCHANGE_CONTRACT_ADDRESS,
-      from: from,
-      data: data,
-      gasPrice: parseInt(gasPrice).toString(16),
-      gas: parseInt(gasAmount).toString(16),
-      value: parseInt(srcAmountFull).toString(16),
-    };
-  } else {
-    gasAmount = await swapABI.estimateGas({from: from});
-    transactionParameters = {
-      to: EnvConfig.EXCHANGE_CONTRACT_ADDRESS,
-      from: from,
-      data: data,
-      gasPrice: parseInt(gasPrice).toString(16),
-      gas: parseInt(gasAmount).toString(16),
-    };
-  }
-  console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount}`);
-  console.debug('MetamaskService::sendTransaction', transactionParameters);
-  const txHash = await ethereum.request({
-    method: 'eth_sendTransaction',
-    params: [transactionParameters],
-  });
-  console.debug('MetamaskService::sendTransaction', `txHash (Transaction hash): ${txHash}`);
-  return txHash;
+  $('#wallet-token').val(`${tokenService.findTokenBySymbol(srcSymbol).name} (${srcSymbol})`);
 }
 
 async function refreshTokenRate() {
@@ -98,7 +41,7 @@ async function refreshTokenRate() {
   const destSymbol = $('#selected-dest-symbol').html();
   const srcAmount = parseInt($('#swap-source-amount').val());
 
-  const rate = await updateExchangeRate(srcSymbol, destSymbol, srcAmount);
+  const rate = await exchangeService.queryExchangeRate(srcSymbol, destSymbol, srcAmount);
   const destAmount = srcAmount * rate;
 
   $('#rate-src-symbol').html(srcSymbol);
@@ -117,9 +60,7 @@ async function refreshTokenRate() {
 
 function forceRefreshBalance() {
   // force update
-  metamaskService.updateTokenBalances().then((tokenBalances) => {
-    refreshUserBalance(tokenBalances);
-  });
+  metamaskService.updateTokenBalances().then((tokenBalances) => refreshUserBalance(tokenBalances));
 }
 
 function initiateDefaultRate(srcSymbol, destSymbol) {
@@ -128,12 +69,10 @@ function initiateDefaultRate(srcSymbol, destSymbol) {
   console.info('Background refresh exchange rate service started!');
 }
 
-const findTokenBySymbol = symbol => EnvConfig.TOKENS.find(token => token.symbol === symbol);
-const findTokenByRawName = rawName => EnvConfig.TOKENS.find((token) => `${token.name} (${token.symbol})` === rawName);
 
 function refreshUserBalance(tokenBalances) {
   const tokenRawName = $('#wallet-token').val();
-  const token = findTokenByRawName(tokenRawName);
+  const token = tokenService.findTokenByRawName(tokenRawName);
   if (token) {
     const tokenBalance = tokenBalances[token.symbol] / 1e18;
     console.debug(`Token balance of ${token.symbol}: ${tokenBalance}`);
@@ -172,32 +111,6 @@ function validateTransferDestinationAddress() {
   const destinationAddress = $('#transfer-address').val();
   console.debug(`Typed Transfer Destination Address: ${destinationAddress} -- ${web3.utils.isAddress(destinationAddress)}`);
   return web3.utils.isAddress(destinationAddress);
-}
-
-async function getTransferFee(srcSymbol, sourceAmount, destinationAddress) {
-  const gasPrice = await web3.eth.getGasPrice();
-  const srcAmountFull = web3.utils.toWei(BigInt(sourceAmount).toString(), 'ether');
-  let gasAmount;
-  if (srcSymbol === EnvConfig.NATIVE_TOKEN.symbol) {
-    // native token transfer
-    gasAmount = await web3.eth.estimateGas({
-      from: metamaskService.getAccount(),
-      to: destinationAddress,
-      value: srcAmountFull,
-    });
-  } else {
-    // ERC20 token
-    const srcToken = findTokenBySymbol(srcSymbol);
-    gasAmount = await getTransferABI({
-      amount: srcAmountFull,
-      toAddress: destinationAddress,
-      tokenAddress: srcToken.address,
-    }).estimateGas({
-      from: metamaskService.getAccount(),
-    });
-  }
-  const gasFee = gasPrice * gasAmount;
-  return web3.utils.fromWei(BigInt(gasFee).toString(), 'ether');
 }
 
 $(function () {
@@ -318,7 +231,7 @@ $(function () {
       return;
     }
 
-    swapToken(srcSymbol, destSymbol, srcAmount).then((value) => {
+    exchangeService.swapToken(srcSymbol, destSymbol, srcAmount).then((value) => {
       console.info("Swap token success", value);
     }).catch((err) => {
       console.error("Swap token failed: ", err);
@@ -333,12 +246,7 @@ $(function () {
     const srcSymbol = $('#selected-transfer-token').html();
     const destinationAddress = $('#transfer-address').val();
 
-    metamaskService.sendTransaction({
-      from: metamaskService.getAccount(),
-      to: destinationAddress,
-      srcAmount: sourceAmount,
-      tokenAddress: findTokenBySymbol(srcSymbol).address,
-    }).then((value) => {
+    exchangeService.transferToken(srcSymbol, destinationAddress, sourceAmount).then((value) => {
       console.info("Transfer token success - Transaction hash:", value);
     }).catch((err) => {
       console.error("Transfer token failed: ", err);
