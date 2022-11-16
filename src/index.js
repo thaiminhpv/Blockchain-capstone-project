@@ -1,4 +1,4 @@
-import {getExchangeRate, getSwapABI} from "./services/networkService";
+import {getExchangeRate, getSwapABI, getTransferABI} from "./services/networkService";
 import EnvConfig from "./configs/env";
 import MetamaskService from "./services/accounts/MetamaskService";
 import {getWeb3Instance} from "./services/web3Service";
@@ -149,6 +149,32 @@ function validateTransferDestinationAddress() {
   return web3.utils.isAddress(destinationAddress);
 }
 
+async function getTransferFee(srcSymbol, sourceAmount, destinationAddress) {
+  const gasPrice = await web3.eth.getGasPrice();
+  const srcAmountFull = web3.utils.toWei(BigInt(sourceAmount).toString(), 'ether');
+  let gasAmount;
+  if (srcSymbol === findTokenBySymbol(EnvConfig.NATIVE_TOKEN.address).symbol) {
+    // native token transfer
+    gasAmount = await web3.eth.estimateGas({
+      from: metamaskService.getAccount(),
+      to: destinationAddress,
+      value: srcAmountFull,
+    });
+  } else {
+    // ERC20 token
+    const srcToken = findTokenBySymbol(srcSymbol);
+    gasAmount = await getTransferABI({
+      amount: srcAmountFull,
+      toAddress: destinationAddress,
+      tokenAddress: srcToken.address,
+    }).estimateGas({
+      from: metamaskService.getAccount(),
+    });
+  }
+  const gasFee = gasPrice * gasAmount;
+  return web3.utils.fromWei(gasFee, 'ether');
+}
+
 $(function () {
   initiateProject();
 
@@ -227,12 +253,26 @@ $(function () {
     $(`#${modalId}`).addClass('modal--active');
     refreshTokenRate();
   });
+  // Handle on Swap Now button clicked
+  $('#transfer-button').on('click', async function () {
+    const modalId = $(this).data('modal-id');
+    $(`#${modalId}`).addClass('modal--active');
+
+    const sourceAmount = $('#transfer-source-amount').val();
+    const srcSymbol = $('#selected-transfer-token').html();
+    const destinationAddress = $('#transfer-address').val();
+    const transferFee = await getTransferFee(srcSymbol, sourceAmount, destinationAddress);
+    console.debug(`Transfer button clicked: ${sourceAmount} ${srcSymbol} to ${destinationAddress} with fee ${transferFee}`);
+    $('.src-transfer').html(sourceAmount + " " + srcSymbol);
+    $('.dest-transfer').html($('#transfer-address').val());
+    $('.transfer-fee').html(transferFee + " " + EnvConfig.NATIVE_TOKEN.symbol);
+  });
 
   $('.modal__cancel').on('click', function () {
     $(this).parents('.modal').removeClass('modal--active');
   });
 
-  $('.modal__confirm').on('click', function () {
+  $('.modal__confirm[data-modal-id="confirm-swap-modal"]').on('click', function () {
     $(this).parents('.modal').removeClass('modal--active');
     const srcSymbol = $('#selected-src-symbol').html();
     const destSymbol = $('#selected-dest-symbol').html();
@@ -248,6 +288,10 @@ $(function () {
     }).catch((err) => {
       console.error("Swap token failed: ", err);
     });
+  });
+
+  $('.modal__confirm[data-modal-id="confirm-transfer-modal"]').on('click', function () {
+    // Transfer Token to another address
   });
 
   // Tab Processing

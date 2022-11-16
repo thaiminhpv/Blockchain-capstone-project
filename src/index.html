@@ -99,7 +99,7 @@
               </div>
               <div class="dropdown__content"></div>
             </div>
-            <input class="input-item" id="transfer-source-amount" type="text"/>
+            <input class="input-item" id="transfer-source-amount" type="text" value="1" placeholder="1"/>
           </div>
         </div>
 
@@ -114,7 +114,7 @@
             </div>
         </div>
 
-        <div id="transfer-button" class="button">Transfer Now</div>
+        <div class="button modal-trigger" data-modal-id="confirm-transfer-modal" id="transfer-button">Transfer Now</div>
       </div>
 
       <div class="import-account">
@@ -153,6 +153,22 @@
     <div class="modal__button">
         <div class="modal__cancel" data-modal-id="confirm-swap-modal">Cancel</div>
         <div class="modal__confirm" data-modal-id="confirm-swap-modal">Confirm</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="confirm-transfer-modal">
+  <div class="modal__content">
+    <div class="modal__title"><h1>CONFIRM TRANSFER</h1></div>
+    <div class="modal__token">
+      <span class="src-transfer">1 TOMO</span>
+      to
+      <span class="dest-transfer">0x0BBE5B854d8638f6785B22E6b61d3B35F74a755a</span>
+    </div>
+    <div class="modal__fee">Transaction Fee: <span id="transfer-fee">0.0001 TOMO</span></div>
+    <div class="modal__button">
+      <div class="modal__cancel" data-modal-id="confirm-transfer-modal">Cancel</div>
+      <div class="modal__confirm" data-modal-id="confirm-transfer-modal">Confirm</div>
     </div>
   </div>
 </div>
