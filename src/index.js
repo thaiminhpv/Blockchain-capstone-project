@@ -187,10 +187,6 @@ $(function () {
 
   // Import Metamask
   $('#import-metamask').on('click', async function () {
-    /* TODO: Importing wallet by Metamask goes here. */
-    // metamaskService.addCustomTokenToMetamask(EnvConfig.TOKENS[1]);
-    // metamaskService.addCustomTokenToMetamask(EnvConfig.TOKENS[2]);
-
     await metamaskService.connectWallet();
     $('#wallet-address').val(metamaskService.getAccount());
     $('.side-content').show();
@@ -202,6 +198,11 @@ $(function () {
       refreshUserBalance(tokenBalances);
     });
     console.info("Background fetch balance worker started!");
+  });
+
+  $('#import-erc20').on('click', function () {
+    metamaskService.addCustomTokenToMetamask(EnvConfig.TOKENS[1]);
+    metamaskService.addCustomTokenToMetamask(EnvConfig.TOKENS[2]);
   });
 
   $('#wallet-token').on('click', function () {
