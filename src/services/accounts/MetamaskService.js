@@ -10,6 +10,10 @@ export default class MetamaskService {
     this.backgroundFetchBalanceWorker = null;
   }
 
+  getAccount() {
+    return this.account;
+  }
+
   addCustomTokenToMetamask(token, image = "https://picsum.photos/200", decimals = 18) {
     let [address, symbol] = [token["address"], token["symbol"]]
     image = token["image"] || image
@@ -71,28 +75,18 @@ export default class MetamaskService {
     // this.tokenbalances is a map of token address to balance
     let account = this.getAccount();
 
-    // return EnvConfig.TOKENS.map(async (token) => {
-    //   try {
-    //     let balance = await getTokenBalances(token.address, account);
-    //     console.log('MetamaskService::updateTokenBalances', `User ${account}'s ${token.symbol} balance: ${balance}`);
-    //     return (token.symbol, balance);
-    //   } catch (error) {
-    //     console.log('MetamaskService::updateTokenBalances', error);
-    //   }
-    // }).reduce((acc, cur) => acc[cur[0]] = cur[1], {});
-
     let tokenBalances = {};
     for (let token of EnvConfig.TOKENS) {
       try {
         let balance = await getTokenBalances(token.address, account);
-        console.log('MetamaskService::updateTokenBalances', `User ${account}'s ${token.symbol} balance: ${balance}`);
+        console.debug('MetamaskService::updateTokenBalances', `User ${account}'s ${token.symbol} balance: ${balance}`);
         tokenBalances[token.symbol] = balance;
       } catch (error) {
         console.error('Error occured when fetching token ', token);
         console.error('MetamaskService::updateTokenBalances', error);
       }
     }
-    console.log('MetamaskService::updateTokenBalances | Token balances', tokenBalances);
+    console.debug('MetamaskService::updateTokenBalances | Token balances', tokenBalances);
     return tokenBalances;
   }
 

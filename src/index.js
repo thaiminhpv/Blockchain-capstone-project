@@ -39,7 +39,7 @@ async function updateExchangeRate(srcSymbol, destSymbol, srcAmount = 1) {
 
   try {
     const exchangeRate = await getExchangeRate(srcToken.address, destToken.address, srcAmountFull);
-    console.log(`Exchange rate of ${srcSymbol}->${destSymbol}: ${exchangeRate}`);
+    console.debug(`Exchange rate of ${srcSymbol}->${destSymbol}: ${exchangeRate}`);
     return web3.utils.fromWei(exchangeRate, 'ether');
   } catch (error) {
     console.error(error);
@@ -64,7 +64,7 @@ async function refreshTokenRate() {
   $('.dest-swap').html(`${destAmount} ${destSymbol}`);
   $('.rate-swap').html(`1 ${srcSymbol} = ${rate} ${destSymbol}`);
   const gas = web3.utils.fromWei(await getWeb3Instance().eth.getGasPrice(), 'ether');
-  console.log(`Gas price: ${gas}`);
+  console.debug(`Gas price: ${gas}`);
   $('#gas-amount').html(`${gas} ${EnvConfig.TOKENS[0].symbol}`);
   // FIXME: Update dest amount when srcToken is same as destToken
 }
@@ -90,7 +90,7 @@ function refreshUserBalance(tokenBalances) {
   const token = findTokenByRawName(tokenRawName);
   if (token) {
     const tokenBalance = tokenBalances[token.symbol] / 1e18;
-    console.log(`Token balance of ${token.symbol}: ${tokenBalance}`);
+    console.debug(`Token balance of ${token.symbol}: ${tokenBalance}`);
     $('#wallet-balance').val(tokenBalance);
   }
 }
@@ -107,9 +107,9 @@ function initiateProject() {
 function validateSourceAmount() {
   const sourceAmount = $('#swap-source-amount').val();
   // filter everything except numbers and dot
-  console.log("Source Amount before: ", sourceAmount);
+  console.debug("Source Amount before: ", sourceAmount);
   const filteredSourceAmount = sourceAmount.replace(/[^0-9.]/g, '');
-  console.log(`Source Amount after: ${filteredSourceAmount}`);
+  console.debug(`Source Amount after: ${filteredSourceAmount}`);
   $('#swap-source-amount').val(filteredSourceAmount);
 }
 
