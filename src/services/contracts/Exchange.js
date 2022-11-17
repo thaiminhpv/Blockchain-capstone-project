@@ -59,7 +59,6 @@ export default class Exchange {
   }
 
   async swapToken(srcSymbol, destSymbol, srcAmount) {
-    debugger
     const srcToken = this.tokenService.findTokenBySymbol(srcSymbol);
     const destToken = this.tokenService.findTokenBySymbol(destSymbol);
     const srcAmountFull = this.web3.utils.toWei(BigInt(srcAmount).toString(), 'ether');
@@ -72,8 +71,8 @@ export default class Exchange {
       srcAmount: srcAmountFull,
     })
     let data = swapABI.encodeABI();
-    let gasPrice = await this.web3.eth.getGasPrice();
-    let transactionParameters, gasAmount;
+    const gasPrice = await this.web3.eth.getGasPrice();
+    let transactionParameters, gasAmount, allowance;
 
     if (srcToken.address === EnvConfig.NATIVE_TOKEN.address) {
       gasAmount = await swapABI.estimateGas({from: from, value: srcAmountFull});
@@ -86,11 +85,14 @@ export default class Exchange {
         value: parseInt(srcAmountFull).toString(16),
       };
     } else {
-      // ERC20 token
-      // TODO: approve first then swap
+      // ERC20 token - check allowance -> approve -> check allowance -> swap
+      allowance = await getAllowance(srcToken.address, from, EnvConfig.EXCHANGE_CONTRACT_ADDRESS);
+      console.debug(`Exchange::swapToken - Allowance before: ${allowance}`);
       const approveABI = getApproveABI(srcToken.address, srcAmountFull);
-      let gasAmount = await approveABI.estimateGas({from: from});
-      console.debug(`Approve gas amount: ${gasAmount}`);
+      gasAmount = await approveABI.estimateGas({from: from});
+      console.debug(`Exchange::swapToken - Approve gas amount: ${gasAmount}`);
+      allowance = await getAllowance(srcToken.address, from, EnvConfig.EXCHANGE_CONTRACT_ADDRESS);
+      console.debug(`Exchange::swapToken - Allowance after estimate gas amount: ${allowance}`);
       const approveTxHash = await ethereum.request({
         method: 'eth_sendTransaction',
         params: [{
@@ -101,10 +103,12 @@ export default class Exchange {
           gas: parseInt(gasAmount).toString(16),
         }]
       });
-      const allowance = await getAllowance(srcToken.address, from, EnvConfig.EXCHANGE_CONTRACT_ADDRESS);
-      console.debug(`Allowance: ${allowance}`);
+      allowance = await getAllowance(srcToken.address, from, EnvConfig.EXCHANGE_CONTRACT_ADDRESS);
+      console.debug(`Exchange::swapToken - Allowance after call approve: ${allowance}`);
       gasAmount = await swapABI.estimateGas({from: from});
-      console.debug(`Swap gas amount: ${gasAmount}`);
+      console.debug(`Exchange::swapToken - Swap gas estimated amount: ${gasAmount}`);
+      allowance = await getAllowance(srcToken.address, from, EnvConfig.EXCHANGE_CONTRACT_ADDRESS);
+      console.debug(`Exchange::swapToken - Allowance after call estimate Swap gas: ${allowance}`);
       transactionParameters = {
         to: EnvConfig.EXCHANGE_CONTRACT_ADDRESS,
         from: from,
@@ -113,13 +117,15 @@ export default class Exchange {
         gas: parseInt(gasAmount).toString(16),
       };
     }
-    console.debug('Exchange::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount}`);
-    console.debug('Exchange::sendTransaction', transactionParameters);
+    console.debug('Exchange::swapToken -', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount}`);
+    console.debug('Exchange::swapToken -', transactionParameters);
     const txHash = await ethereum.request({
       method: 'eth_sendTransaction',
       params: [transactionParameters],
     });
-    console.debug('Exchange::sendTransaction', `txHash (Transaction hash): ${txHash}`);
+    allowance = await getAllowance(srcToken.address, from, EnvConfig.EXCHANGE_CONTRACT_ADDRESS);
+    console.debug('Exchange::swapToken -', `Allowance after send transaction: ${allowance}`);
+    console.debug('Exchange::swapToken -', `done! txHash (Transaction hash): ${txHash}`);
     return txHash;
   }
 }
