@@ -45,6 +45,47 @@ export default class Exchange {
    * @param srcSymbol
    * @param destSymbol
    * @param srcAmount in Wei
+   * @returns {Promise<string|*|number|number>} swap fee in Wei
+   */
+  async getSwapFee(srcSymbol, destSymbol, srcAmount) {
+    if (srcSymbol === destSymbol) return 0;
+    const srcToken = this.tokenService.findTokenBySymbol(srcSymbol);
+    const destToken = this.tokenService.findTokenBySymbol(destSymbol);
+    // const srcAmountFull = this.web3.utils.toWei(BigInt(srcAmount).toString(), 'ether');
+    const srcAmountFull = BigInt(srcAmount).toString();
+    const from = this.metamaskService.getAccount()
+
+    let swapABI = getSwapABI({
+      srcTokenAddress: srcToken.address,
+      destTokenAddress: destToken.address,
+      srcAmount: srcAmountFull,
+    })
+    let data = swapABI.encodeABI();
+    const gasPrice = await this.web3.eth.getGasPrice();
+    let transactionParameters, gasAmount, allowance;
+
+    if (srcToken.address === EnvConfig.NATIVE_TOKEN.address) {
+      gasAmount = await swapABI.estimateGas({from: from, value: srcAmountFull});
+      transactionParameters = {
+        to: EnvConfig.EXCHANGE_CONTRACT_ADDRESS,
+        from: from,
+        data: data,
+        gasPrice: parseInt(gasPrice).toString(16),
+        gas: parseInt(gasAmount).toString(16),
+        value: parseInt(srcAmountFull).toString(16),
+      };
+    } else if (destToken.address === EnvConfig.NATIVE_TOKEN.address) {
+      return await this.getSwapFee(EnvConfig.NATIVE_TOKEN.symbol, srcSymbol, srcAmount * await this.queryExchangeRate(srcSymbol, EnvConfig.NATIVE_TOKEN.symbol, srcAmount));// flip
+    } else {
+      return (BigInt(await this.getSwapFee(srcSymbol, EnvConfig.NATIVE_TOKEN.symbol, srcAmount)) + BigInt(await this.getSwapFee(destSymbol, EnvConfig.NATIVE_TOKEN.symbol, srcAmount * await this.queryExchangeRate(srcSymbol, destSymbol, srcAmount)))).toString();
+    }
+    return BigInt(gasPrice * gasAmount).toString();
+  }
+
+  /**
+   * @param srcSymbol
+   * @param destSymbol
+   * @param srcAmount in Wei
    * @returns {Promise<string|number>} rate in %
    */
   async queryExchangeRate(srcSymbol, destSymbol, srcAmount = 1e18) {

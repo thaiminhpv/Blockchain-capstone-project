@@ -53,7 +53,7 @@ async function refreshTokenRate() {
   $('.dest-swap').html(`${destAmount} ${destSymbol}`);
   $('.rate-swap').html(`1 ${srcSymbol} = ${rate} ${destSymbol}`);
   if (metamaskService.getAccount()) {
-    const gas = web3.utils.fromWei(await getWeb3Instance().eth.getGasPrice(), 'ether');
+    const gas = web3.utils.fromWei(await exchangeService.getSwapFee(srcSymbol, destSymbol, srcAmount), 'ether');
     console.debug(`Swap gas price: ${gas}`);
     $('#gas-amount').html(`${gas} ${EnvConfig.NATIVE_TOKEN.symbol}`);
   }
