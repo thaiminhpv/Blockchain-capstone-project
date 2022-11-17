@@ -1,6 +1,5 @@
 import EnvConfig from "../../configs/env";
-import {getTokenBalances, getTransferABI} from "../networkService";
-import AppConfig from "../../configs/app";
+import {getTransferABI} from "../networkService";
 
 export default class MetamaskService {
 
@@ -9,11 +8,6 @@ export default class MetamaskService {
     this.account = null;
     this.backgroundFetchBalanceWorker = null;
   }
-
-  numEtherToWeiHex(num) {
-    return parseInt(this.web3.utils.toWei(BigInt(num).toString(), 'ether')).toString(16);
-  }
-
   getAccount() {
     return this.account;
   }
@@ -39,6 +33,13 @@ export default class MetamaskService {
     });
   }
 
+  /**
+   * @param from
+   * @param to
+   * @param srcAmount in Wei
+   * @param tokenAddress
+   * @returns {Promise<*>}
+   */
   async sendTransaction({
       from,
       to,
@@ -50,11 +51,11 @@ export default class MetamaskService {
     if (tokenAddress === EnvConfig.NATIVE_TOKEN.address) {
       // Value should be in hex
       // https://ethereum.stackexchange.com/questions/85308/metamask-displaying-wrong-value-when-making-rpc-sendtransaction-call
-      let srcAmountFull = this.numEtherToWeiHex(srcAmount);
+      let srcAmountFull = parseInt(srcAmount).toString(16);
       console.debug('sendTransaction::srcAmountFull', srcAmountFull);
 
       let gasAmount = await this.web3.eth.estimateGas({from, to, value: srcAmount});
-      console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount}`);
+      console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount / 1e18}`);
 
       const transactionParameters = {
         gasPrice: parseInt(gasPrice).toString(16),

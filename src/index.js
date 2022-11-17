@@ -39,22 +39,24 @@ function initiateSelectedToken(srcSymbol, destSymbol) {
 async function refreshTokenRate() {
   const srcSymbol = $('#selected-src-symbol').html();
   const destSymbol = $('#selected-dest-symbol').html();
-  const srcAmount = parseInt($('#swap-source-amount').val());
+  const srcAmount = parseInt(parseFloat($('#swap-source-amount').val()) * 1e18);  // parse from Ether to Wei
 
   const rate = await exchangeService.queryExchangeRate(srcSymbol, destSymbol, srcAmount);
-  const destAmount = srcAmount * rate;
+  const destAmount = srcAmount * rate / 1e18;
 
   $('#rate-src-symbol').html(srcSymbol);
   $('#rate-dest-symbol').html(destSymbol);
   $('#swap-dest-amount').html(destAmount);
   $('#exchange-rate').html(rate);
 
-  $('.src-swap').html(`${srcAmount} ${srcSymbol}`);
+  $('.src-swap').html(`${srcAmount / 1e18} ${srcSymbol}`);
   $('.dest-swap').html(`${destAmount} ${destSymbol}`);
   $('.rate-swap').html(`1 ${srcSymbol} = ${rate} ${destSymbol}`);
-  const gas = web3.utils.fromWei(await getWeb3Instance().eth.getGasPrice(), 'ether');
-  console.debug(`Gas price: ${gas}`);
-  $('#gas-amount').html(`${gas} ${EnvConfig.NATIVE_TOKEN.symbol}`);
+  if (metamaskService.getAccount()) {
+    const gas = web3.utils.fromWei(await getWeb3Instance().eth.getGasPrice(), 'ether');
+    console.debug(`Swap gas price: ${gas}`);
+    $('#gas-amount').html(`${gas} ${EnvConfig.NATIVE_TOKEN.symbol}`);
+  }
   // FIXME: Update dest amount when srcToken is same as destToken
 }
 
@@ -187,6 +189,10 @@ $(function () {
 
   // Handle on Swap Now button clicked
   $('#swap-button').on('click', function () {
+    if (metamaskService.getAccount() === null) {
+      alert("Please import wallet first.");
+      return;
+    }
     const modalId = $(this).data('modal-id');
     $(`#${modalId}`).addClass('modal--active');
     refreshTokenRate();
@@ -200,7 +206,7 @@ $(function () {
     const modalId = $(this).data('modal-id');
     $(`#${modalId}`).addClass('modal--active');
 
-    const sourceAmount = $('#transfer-source-amount').val();
+    const sourceAmount = parseInt(parseFloat($('#transfer-source-amount').val()) * 1e18);  // parse from Ether to Wei
     const srcSymbol = $('#selected-transfer-token').html();
     const destinationAddress = $('#transfer-address').val();
     const transferFee = await exchangeService.getTransferFee(srcSymbol, sourceAmount, destinationAddress);
@@ -218,12 +224,7 @@ $(function () {
     $(this).parents('.modal').removeClass('modal--active');
     const srcSymbol = $('#selected-src-symbol').html();
     const destSymbol = $('#selected-dest-symbol').html();
-    const srcAmount = parseInt($('#swap-source-amount').val());
-
-    if (metamaskService.getAccount() === null) {
-      alert("Please import wallet first.");
-      return;
-    }
+    const srcAmount = parseInt(parseFloat($('#swap-source-amount').val()) * 1e18);  // parse from Ether to Wei
 
     exchangeService.swapToken(srcSymbol, destSymbol, srcAmount).then((value) => {
       console.info("Swap token success", value);
@@ -236,7 +237,7 @@ $(function () {
     // Transfer Token to another address
     $(this).parents('.modal').removeClass('modal--active');
 
-    const sourceAmount = $('#transfer-source-amount').val();
+    const sourceAmount = parseInt(parseFloat($('#transfer-source-amount').val()) * 1e18);  // parse from Ether to Wei
     const srcSymbol = $('#selected-transfer-token').html();
     const destinationAddress = $('#transfer-address').val();
 

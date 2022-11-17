@@ -1,4 +1,4 @@
-import {getExchangeRate, getSwapABI, getTransferABI, getApproveABI, getAllowance} from "../networkService";
+import {getAllowance, getApproveABI, getExchangeRate, getSwapABI, getTransferABI} from "../networkService";
 import EnvConfig from "../../configs/env";
 
 export default class Exchange {
@@ -9,9 +9,15 @@ export default class Exchange {
     this.metamaskService = metaMask;
   }
 
+  /**
+   * @param srcSymbol
+   * @param sourceAmount in Wei
+   * @param destinationAddress
+   * @returns {Promise<string>} gas fee in Ether
+   */
   async getTransferFee(srcSymbol, sourceAmount, destinationAddress) {
     const gasPrice = await this.web3.eth.getGasPrice();
-    const srcAmountFull = this.web3.utils.toWei(BigInt(sourceAmount).toString(), 'ether');
+    const srcAmountFull = BigInt(sourceAmount).toString();
     let gasAmount;
     if (srcSymbol === EnvConfig.NATIVE_TOKEN.symbol) {
       // native token transfer
@@ -35,10 +41,16 @@ export default class Exchange {
     return this.web3.utils.fromWei(BigInt(gasFee).toString(), 'ether');
   }
 
-  async queryExchangeRate(srcSymbol, destSymbol, srcAmount = 1) {
+  /**
+   * @param srcSymbol
+   * @param destSymbol
+   * @param srcAmount in Wei
+   * @returns {Promise<string|number>} rate in %
+   */
+  async queryExchangeRate(srcSymbol, destSymbol, srcAmount = 1e18) {
     const srcToken = this.tokenService.findTokenBySymbol(srcSymbol);
     const destToken = this.tokenService.findTokenBySymbol(destSymbol);
-    const srcAmountFull = BigInt(srcAmount * 1e18);
+    const srcAmountFull = BigInt(srcAmount);
     try {
       const exchangeRate = await getExchangeRate(srcToken.address, destToken.address, srcAmountFull);
       console.debug(`Exchange rate of ${srcSymbol}->${destSymbol}: ${exchangeRate}`);
@@ -49,6 +61,12 @@ export default class Exchange {
     }
   }
 
+  /**
+   * @param srcSymbol
+   * @param destAddress
+   * @param srcAmount in Wei
+   * @returns {Promise<*>}
+   */
   async transferToken(srcSymbol, destAddress, srcAmount) {
     return this.metamaskService.sendTransaction({
       from: this.metamaskService.getAccount(),
@@ -58,10 +76,16 @@ export default class Exchange {
     })
   }
 
+  /**
+   * @param srcSymbol
+   * @param destSymbol
+   * @param srcAmount in Wei
+   * @returns {Promise<*>}
+   */
   async swapToken(srcSymbol, destSymbol, srcAmount) {
     const srcToken = this.tokenService.findTokenBySymbol(srcSymbol);
     const destToken = this.tokenService.findTokenBySymbol(destSymbol);
-    const srcAmountFull = this.web3.utils.toWei(BigInt(srcAmount).toString(), 'ether');
+    const srcAmountFull = BigInt(srcAmount).toString();
     const from = this.metamaskService.getAccount()
 
     console.log(`Swapping ${srcAmountFull} ${srcSymbol} to ${destSymbol} via account ${from}`);
@@ -123,8 +147,10 @@ export default class Exchange {
       method: 'eth_sendTransaction',
       params: [transactionParameters],
     });
-    allowance = await getAllowance(srcToken.address, from, EnvConfig.EXCHANGE_CONTRACT_ADDRESS);
-    console.debug('Exchange::swapToken -', `Allowance after send transaction: ${allowance}`);
+    if (srcToken.address !== EnvConfig.NATIVE_TOKEN.address) {
+      allowance = await getAllowance(srcToken.address, from, EnvConfig.EXCHANGE_CONTRACT_ADDRESS);
+      console.debug(`Exchange::swapToken - Allowance after send transaction: ${allowance}`);
+    }
     console.debug('Exchange::swapToken -', `done! txHash (Transaction hash): ${txHash}`);
     return txHash;
   }
