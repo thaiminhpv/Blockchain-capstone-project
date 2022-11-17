@@ -159,10 +159,8 @@ $(function () {
 
   $('#transfer-address').on('input change', function () {
     if (validateTransferDestinationAddress()) {
-      $('#transfer-button').prop('disabled', false);
       $('#transfer-address-error-message').hide();
     } else {
-      $('#transfer-button').prop('disabled', true);
       $('#transfer-address-error-message').show();
     }
   });
@@ -201,6 +199,10 @@ $(function () {
   $('#transfer-button').on('click', async function () {
     if (metamaskService.getAccount() === null) {
       alert("Please import wallet first.");
+      return;
+    }
+    if (!validateTransferDestinationAddress()) {
+      alert("Please enter a valid destination address.");
       return;
     }
     const modalId = $(this).data('modal-id');
