@@ -17,8 +17,8 @@ module.exports = async function(deployer, network, accounts) {
     const reserveA = await Reserve.new(tokenA.address, 120, 100);
     const reserveB = await Reserve.new(tokenB.address, 350, 380);
 
-    let initialEther = web3.utils.toWei("100", "ether");
-    let initialTokenAmount = web3.utils.toWei("100000", "ether");
+    let initialEther = web3.utils.toWei("10000", "ether");
+    let initialTokenAmount = web3.utils.toWei("10000000000", "ether");
     // send @initialEther tokenA to reserveA and @initialEther tokenB to reserveB
     await tokenA.transfer(reserveA.address, initialTokenAmount, {from: accounts[0]});
     await tokenB.transfer(reserveB.address, initialTokenAmount, {from: accounts[0]});
