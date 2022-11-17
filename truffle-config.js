@@ -36,7 +36,7 @@ module.exports = {
         "m/44'/889'/0'/0/",
       ),
       network_id: "89",
-      gas: 2000000,
+      gas: 10000000,
       gasPrice: 10000000000000,  // TomoChain requires min 10 TOMO to deploy, to fight spamming attacks
     },
     tomomainnet: {
@@ -49,7 +49,7 @@ module.exports = {
         "m/44'/889'/0'/0/",
       ),
       network_id: "88",
-      gas: 2000000,
+      gas: 10000000,
       gasPrice: 10000000000000,  // TomoChain requires min 10 TOMO to deploy, to fight spamming attacks
     },
   },
@@ -59,7 +59,7 @@ module.exports = {
 
   compilers: {
     solc: {
-      version: "^0.4.17"
+      version: "^0.4.26"
     }
   }
 };
