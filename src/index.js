@@ -65,8 +65,7 @@ function forceRefreshBalance() {
 
 function initiateDefaultRate(srcSymbol, destSymbol) {
   refreshTokenRate();
-  setInterval(refreshTokenRate, AppConfig.EXCHANGE_RATE_FETCH_INTERVAL);
-  console.info('Background refresh exchange rate service started!');
+  tokenService.startBackgroundFetchTokenRateWorker(refreshTokenRate);
 }
 
 function refreshUserBalance(tokenBalances) {
@@ -130,11 +129,7 @@ $(function () {
 
     forceRefreshBalance();
     // Start background fetch balance worker.
-    tokenService.startBackgroundFetchBalanceWorker(metamaskService.getAccount(), (tokenBalances) => {
-      console.debug("Return from background fetch balance worker: ", tokenBalances);
-      refreshUserBalance(tokenBalances);
-    });
-    console.info("Background fetch balance worker started!");
+    tokenService.startBackgroundFetchBalanceWorker(metamaskService.getAccount(), (tokenBalances) => refreshUserBalance(tokenBalances));
   });
 
   $('#import-erc20').on('click', function () {
@@ -208,7 +203,7 @@ $(function () {
     const sourceAmount = $('#transfer-source-amount').val();
     const srcSymbol = $('#selected-transfer-token').html();
     const destinationAddress = $('#transfer-address').val();
-    const transferFee = await getTransferFee(srcSymbol, sourceAmount, destinationAddress);
+    const transferFee = await exchangeService.getTransferFee(srcSymbol, sourceAmount, destinationAddress);
     console.debug(`Transfer button clicked: ${sourceAmount} ${srcSymbol} to ${destinationAddress} with fee ${transferFee}`);
     $('.src-transfer').html(sourceAmount + " " + srcSymbol);
     $('.dest-transfer').html($('#transfer-address').val());
