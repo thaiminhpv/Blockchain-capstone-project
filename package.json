@@ -1,0 +1,25 @@
+{
+  "name": "blockchain-capstone-project",
+  "version": "1.0.0",
+  "description": "Design and Development of A Decentralized Exchange",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thaiminhpv/Blockchain-capstone-project.git"
+  },
+  "author": "thaiminhpv",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thaiminhpv/Blockchain-capstone-project/issues"
+  },
+  "homepage": "https://github.com/thaiminhpv/Blockchain-capstone-project#readme",
+  "dependencies": {
+    "truffle-hdwallet-provider": "^1.0.17"
+  }
+}
