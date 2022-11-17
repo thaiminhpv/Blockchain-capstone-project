@@ -1,5 +1,6 @@
 import EnvConfig from "../../configs/env";
 import AppConfig from "../../configs/app";
+import {getTokenBalances} from "../networkService";
 
 export default class Token {
   constructor(web3) {
