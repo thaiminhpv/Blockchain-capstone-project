@@ -53,10 +53,8 @@ export default class MetamaskService {
       // https://ethereum.stackexchange.com/questions/85308/metamask-displaying-wrong-value-when-making-rpc-sendtransaction-call
       let srcAmountFull = parseInt(srcAmount).toString(16);
       console.debug('sendTransaction::srcAmountFull', srcAmountFull);
-
-      let gasAmount = await this.web3.eth.estimateGas({from, to, value: srcAmount});
-      console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount / 1e18}`);
-
+      let gasAmount = await this.web3.eth.estimateGas({from, to, value: srcAmount.toString()});
+      console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${parseInt(srcAmount) / 1e18}`);
       const transactionParameters = {
         gasPrice: parseInt(gasPrice).toString(16),
         gas: parseInt(gasAmount).toString(16),
@@ -76,14 +74,13 @@ export default class MetamaskService {
     } else {
       // ERC20 token
       let transferABI = getTransferABI({
-        amount: this.web3.utils.toWei(srcAmount, 'ether'),
+        amount: srcAmount.toString(),
         toAddress: to,
         tokenAddress: tokenAddress
       })
       let gasAmount = await transferABI.estimateGas({from: from});
       let data = transferABI.encodeABI();
-
-      console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${srcAmount}`);
+      console.debug('MetamaskService::sendTransaction', `gasPrice: ${gasPrice}, gasAmount: ${gasAmount}, srcAmount: ${parseInt(srcAmount) / 1e18}`);
       const transactionParameters = {
         to: tokenAddress,
         from: from,

@@ -53,7 +53,7 @@ async function refreshTokenRate() {
   $('.dest-swap').html(`${destAmount} ${destSymbol}`);
   $('.rate-swap').html(`1 ${srcSymbol} = ${rate} ${destSymbol}`);
   if (metamaskService.getAccount()) {
-    const gas = web3.utils.fromWei(await exchangeService.getSwapFee(srcSymbol, destSymbol, srcAmount), 'ether');
+    const gas = web3.utils.fromWei((await exchangeService.getSwapFee(srcSymbol, destSymbol, srcAmount)).toString(), 'ether');
     console.debug(`Swap gas price: ${gas}`);
     $('#gas-amount').html(`${gas} ${EnvConfig.NATIVE_TOKEN.symbol}`);
   }
@@ -238,7 +238,7 @@ $(function () {
     // Transfer Token to another address
     $(this).parents('.modal').removeClass('modal--active');
 
-    const srcAmount = BigInt(Math.floor(parseFloat($('#swap-source-amount').val()) * 1e18));  // Handle BigFloat, parse from Ether to Wei
+    const srcAmount = BigInt(Math.floor(parseFloat($('#transfer-source-amount').val()) * 1e18));  // Handle BigFloat, parse from Ether to Wei
     const srcSymbol = $('#selected-transfer-token').html();
     const destinationAddress = $('#transfer-address').val();
 

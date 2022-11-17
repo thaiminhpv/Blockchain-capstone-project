@@ -44,8 +44,8 @@ export default class Exchange {
   /**
    * @param srcSymbol
    * @param destSymbol
-   * @param srcAmount in Wei
-   * @returns {Promise<string|*|number|number>} swap fee in Wei
+   * @param {BigInt} srcAmount in Wei
+   * @returns {Promise<BigInt>} swap fee in Wei
    */
   async getSwapFee(srcSymbol, destSymbol, srcAmount) {
     if (srcSymbol === destSymbol) return 0;
@@ -75,11 +75,11 @@ export default class Exchange {
         value: parseInt(srcAmountFull).toString(16),
       };
     } else if (destToken.address === EnvConfig.NATIVE_TOKEN.address) {
-      return await this.getSwapFee(EnvConfig.NATIVE_TOKEN.symbol, srcSymbol, srcAmount * await this.queryExchangeRate(srcSymbol, EnvConfig.NATIVE_TOKEN.symbol, srcAmount));// flip
+      return await this.getSwapFee(EnvConfig.NATIVE_TOKEN.symbol, srcSymbol, BigInt(Math.floor(parseInt(srcAmount) * await this.queryExchangeRate(srcSymbol, EnvConfig.NATIVE_TOKEN.symbol, srcAmount))));// flip
     } else {
-      return (BigInt(await this.getSwapFee(srcSymbol, EnvConfig.NATIVE_TOKEN.symbol, srcAmount)) + BigInt(await this.getSwapFee(destSymbol, EnvConfig.NATIVE_TOKEN.symbol, srcAmount * await this.queryExchangeRate(srcSymbol, destSymbol, srcAmount)))).toString();
+      return BigInt(await this.getSwapFee(srcSymbol, EnvConfig.NATIVE_TOKEN.symbol, srcAmount)) + BigInt(await this.getSwapFee(destSymbol, EnvConfig.NATIVE_TOKEN.symbol, BigInt(Math.floor(parseInt(srcAmount) * await this.queryExchangeRate(srcSymbol, destSymbol, srcAmount)))));
     }
-    return BigInt(gasPrice * gasAmount).toString();
+    return BigInt(gasPrice * gasAmount);
   }
 
   /**
