@@ -39,17 +39,17 @@ function initiateSelectedToken(srcSymbol, destSymbol) {
 async function refreshTokenRate() {
   const srcSymbol = $('#selected-src-symbol').html();
   const destSymbol = $('#selected-dest-symbol').html();
-  const srcAmount = parseInt(parseFloat($('#swap-source-amount').val()) * 1e18);  // parse from Ether to Wei
+  const srcAmount = BigInt(Math.floor(parseFloat($('#swap-source-amount').val()) * 1e18));  // Handle BigFloat, parse from Ether to Wei
 
   const rate = await exchangeService.queryExchangeRate(srcSymbol, destSymbol, srcAmount);
-  const destAmount = srcAmount * rate / 1e18;
+  const destAmount = parseInt(srcAmount) * rate / 1e18;
 
   $('#rate-src-symbol').html(srcSymbol);
   $('#rate-dest-symbol').html(destSymbol);
   $('#swap-dest-amount').html(destAmount);
   $('#exchange-rate').html(rate);
 
-  $('.src-swap').html(`${srcAmount / 1e18} ${srcSymbol}`);
+  $('.src-swap').html(`${parseInt(srcAmount) / 1e18} ${srcSymbol}`);
   $('.dest-swap').html(`${destAmount} ${destSymbol}`);
   $('.rate-swap').html(`1 ${srcSymbol} = ${rate} ${destSymbol}`);
   if (metamaskService.getAccount()) {
@@ -206,12 +206,13 @@ $(function () {
     const modalId = $(this).data('modal-id');
     $(`#${modalId}`).addClass('modal--active');
 
-    const sourceAmount = parseInt(parseFloat($('#transfer-source-amount').val()) * 1e18);  // parse from Ether to Wei
+    const rawSrcAmount = $('#transfer-source-amount').val();
+    const srcAmount = BigInt(Math.floor(parseFloat(rawSrcAmount) * 1e18));  // Handle BigFloat, parse from Ether to Wei
     const srcSymbol = $('#selected-transfer-token').html();
     const destinationAddress = $('#transfer-address').val();
-    const transferFee = await exchangeService.getTransferFee(srcSymbol, sourceAmount, destinationAddress);
-    console.debug(`Transfer button clicked: ${sourceAmount} ${srcSymbol} to ${destinationAddress} with fee ${transferFee}`);
-    $('.src-transfer').html(sourceAmount + " " + srcSymbol);
+    const transferFee = await exchangeService.getTransferFee(srcSymbol, srcAmount, destinationAddress);
+    console.debug(`Transfer button clicked: ${rawSrcAmount} ${srcSymbol} to ${destinationAddress} with fee ${transferFee}`);
+    $('.src-transfer').html(rawSrcAmount + " " + srcSymbol);
     $('.dest-transfer').html($('#transfer-address').val());
     $('#transfer-fee').html(transferFee + " " + EnvConfig.NATIVE_TOKEN.symbol);
   });
@@ -224,7 +225,7 @@ $(function () {
     $(this).parents('.modal').removeClass('modal--active');
     const srcSymbol = $('#selected-src-symbol').html();
     const destSymbol = $('#selected-dest-symbol').html();
-    const srcAmount = parseInt(parseFloat($('#swap-source-amount').val()) * 1e18);  // parse from Ether to Wei
+    const srcAmount = BigInt(Math.floor(parseFloat($('#swap-source-amount').val()) * 1e18));  // Handle BigFloat, parse from Ether to Wei
 
     exchangeService.swapToken(srcSymbol, destSymbol, srcAmount).then((value) => {
       console.info("Swap token success", value);
@@ -237,11 +238,11 @@ $(function () {
     // Transfer Token to another address
     $(this).parents('.modal').removeClass('modal--active');
 
-    const sourceAmount = parseInt(parseFloat($('#transfer-source-amount').val()) * 1e18);  // parse from Ether to Wei
+    const srcAmount = BigInt(Math.floor(parseFloat($('#swap-source-amount').val()) * 1e18));  // Handle BigFloat, parse from Ether to Wei
     const srcSymbol = $('#selected-transfer-token').html();
     const destinationAddress = $('#transfer-address').val();
 
-    exchangeService.transferToken(srcSymbol, destinationAddress, sourceAmount).then((value) => {
+    exchangeService.transferToken(srcSymbol, destinationAddress, srcAmount).then((value) => {
       console.info("Transfer token success - Transaction hash:", value);
     }).catch((err) => {
       console.error("Transfer token failed: ", err);
