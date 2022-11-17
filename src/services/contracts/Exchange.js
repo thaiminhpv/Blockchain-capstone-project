@@ -94,7 +94,7 @@ export default class Exchange {
     const srcAmountFull = BigInt(srcAmount);
     try {
       const exchangeRate = await getExchangeRate(srcToken.address, destToken.address, srcAmountFull);
-      console.debug(`Exchange rate of ${srcSymbol}->${destSymbol}: ${exchangeRate}`);
+      console.debug(`Exchange::queryExchangeRate - Exchange rate of ${srcSymbol}->${destSymbol}: ${exchangeRate}`);
       return this.web3.utils.fromWei(exchangeRate, 'ether');
     } catch (error) {
       console.error(error);

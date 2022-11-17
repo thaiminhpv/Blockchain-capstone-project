@@ -54,7 +54,7 @@ async function refreshTokenRate() {
   $('.rate-swap').html(`1 ${srcSymbol} = ${rate} ${destSymbol}`);
   if (metamaskService.getAccount()) {
     const gas = web3.utils.fromWei((await exchangeService.getSwapFee(srcSymbol, destSymbol, srcAmount)).toString(), 'ether');
-    console.debug(`Swap gas price: ${gas}`);
+    console.debug(`Index::refreshTokenRate - Swap gas price: ${gas}`);
     $('#gas-amount').html(`${gas} ${EnvConfig.NATIVE_TOKEN.symbol}`);
   }
   // FIXME: Update dest amount when srcToken is same as destToken
@@ -75,7 +75,7 @@ function refreshUserBalance(tokenBalances) {
   const token = tokenService.findTokenByRawName(tokenRawName);
   if (token) {
     const tokenBalance = tokenBalances[token.symbol] / 1e18;
-    console.debug(`Token balance of ${token.symbol}: ${tokenBalance}`);
+    console.debug(`Index::refreshUserBalance - Token balance of ${token.symbol}: ${tokenBalance}`);
     $('#wallet-balance').val(tokenBalance);
   }
 }
