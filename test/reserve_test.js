@@ -163,6 +163,9 @@ contract("Reserve contract", (accounts) => {
             assert.equal((await reserveA.supportedToken()), tokenA.address);
             assert.equal((await reserveB.supportedToken()), tokenB.address);
         });
+    });
+
+    describe("Withdraw Funds", () => {
         it("Owner can withdraw ETH", async () => {
             let balanceBefore = await web3.eth.getBalance(accounts[1]);
             let reserveBalanceBefore = await web3.eth.getBalance(reserveA.address);
