@@ -166,6 +166,15 @@ contract("Reserve contract", (accounts) => {
     });
 
     describe("Withdraw Funds", () => {
+        it("Only owner can withdraw funds", async () => {
+            try {
+                let reserveBalanceBefore = await tokenA.balanceOf(reserveA.address);
+                await reserveA.withdrawFunds(tokenA.address, BigInt(reserveBalanceBefore), accounts[1], {from: accounts[1]});
+                assert.fail("Only owner can withdraw funds");
+            } catch (error) {
+                assert.ok(/revert/i.test(error.message));
+            }
+        });
         it("Owner can withdraw ETH", async () => {
             let balanceBefore = await web3.eth.getBalance(accounts[1]);
             let reserveBalanceBefore = await web3.eth.getBalance(reserveA.address);
