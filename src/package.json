@@ -23,7 +23,7 @@
   },
   "scripts": {
     "ganache": "ganache-cli -p 8545 --defaultBalanceEther 100000 --wallet.seed 5555 -i 5777 --chain.chainId 5777",
-    "migrate": "cd .. && truffle migrate --reset && cp ./build/contracts/Exchange.json ./src/services/abi/Exchange.json",
+    "migrate": "cd .. && truffle migrate --reset --network development && cp ./build/contracts/Exchange.json ./src/services/abi/Exchange.json",
     "serve": "beefy index.js --live",
     "design": "beefy index.js",
     "build": "browserify index.js -o dist/bundle.js",
