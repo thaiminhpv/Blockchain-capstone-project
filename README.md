@@ -1,10 +1,8 @@
 # A decentralized exchange for swapping tokens
 
-Design and Development of A Decentralized Exchange
-
 ## Introduction
 
-This project is a decentralized exchange system for swapping between Ether and ERC20 tokens.
+This project is a decentralized exchange application for swapping between Ether and ERC20 tokens.
 
 ## Installation
 
