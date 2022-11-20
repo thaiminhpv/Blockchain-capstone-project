@@ -2,6 +2,8 @@
 
 The application is deployed to [blockchain.thaiminhpv.tech](https://blockchain.thaiminhpv.tech/) and [bdp306b.thaiminhpv.tech](https://bdp306b.thaiminhpv.tech/)
 
+![thumbnail-image](./Thumbnail.png)
+
 ## Introduction
 
 This project is a decentralized exchange application for swapping between Ether and ERC20 tokens.
