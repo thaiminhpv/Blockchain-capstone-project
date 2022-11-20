@@ -1,5 +1,7 @@
 # A decentralized exchange for swapping tokens
 
+The application is deployed to [blockchain.thaiminhpv.tech](https://blockchain.thaiminhpv.tech/) and [bdp306b.thaiminhpv.tech](https://bdp306b.thaiminhpv.tech/)
+
 ## Introduction
 
 This project is a decentralized exchange application for swapping between Ether and ERC20 tokens.
@@ -48,4 +50,4 @@ npm run build
 
 Then comment out `<script src="index.js"/>` in `index.html` and replace with `<script src="dist/bundle.js"/>`.
 
-Pushed commits to the `master` branch are automatically deployed to [blockchain.thaiminhpv.tech](https://blockchain.thaiminhpv.tech) by Vercel.
+Pushed commits to the `master` branch are automatically deployed to [blockchain.thaiminhpv.tech](https://blockchain.thaiminhpv.tech) and [bdp306b.thaiminhpv.tech](https://bdp306b.thaiminhpv.tech/) by Vercel.
