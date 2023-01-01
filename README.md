@@ -9,6 +9,8 @@ on **IPFS**.
 The domain is pointed to [Cloudflare Gateway](https://www.cloudflare-ipfs.com/ipfs/QmcMTehbQf29SH7TcsfxRD9EGGajCkFGnNnH9RqTaQpxeZ/)
 using DNSLink (TXT record), and pinned by [Pinata](https://www.pinata.cloud/).
 
+[Demo video can be watched here](https://www.youtube.com/watch?v=ILrhuCk9Cl0).
+
 ![thumbnail-image](./Thumbnail.png)
 
 ## Introduction
@@ -54,6 +56,7 @@ truffle test
 ### Deploy
 
 ```bash
+cd src
 npm run build
 ```
 
